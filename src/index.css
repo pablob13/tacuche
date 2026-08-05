@@ -1,29 +1,29 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
 
 :root {
-  /* Colors */
-  --bg-primary: #090a0f;
-  --bg-secondary: #11131a;
-  --bg-card: #181b24;
-  --bg-card-hover: #202430;
-  --border-color: #242936;
-  --accent: #d4af37;
-  --accent-hover: #e5c158;
-  --accent-glow: rgba(212, 175, 55, 0.15);
+  /* Colors - Minimalist Atelier (Quiet Luxury) */
+  --bg-primary: #0b0b0a;
+  --bg-secondary: #131312;
+  --bg-card: #1a1a19;
+  --bg-card-hover: #222220;
+  --border-color: #272725;
+  --accent: #c5a880; /* Soft Champagne Gold */
+  --accent-hover: #dfcca7;
+  --accent-glow: rgba(197, 168, 128, 0.12);
   
-  --text-primary: #f3f4f6;
-  --text-secondary: #9ca3af;
-  --text-muted: #626a7a;
+  --text-primary: #ece9e2; /* Warm Off-White */
+  --text-secondary: #a5a199; /* Muted Sand */
+  --text-muted: #74716a;
   
-  --success: #10b981;
-  --success-glow: rgba(16, 185, 129, 0.1);
-  --error: #ef4444;
-  --error-glow: rgba(239, 68, 68, 0.1);
-  --warning: #f59e0b;
-  --info: #3b82f6;
+  --success: #a3b899; /* Soft Sage Green */
+  --success-glow: rgba(163, 184, 153, 0.1);
+  --error: #d4a373; /* Soft Terracotta */
+  --error-glow: rgba(212, 163, 115, 0.1);
+  --warning: #e07a5f;
+  --info: #81b29a;
   
   /* Fonts */
-  --font-heading: 'Outfit', sans-serif;
+  --font-heading: 'Cormorant Garamond', serif;
   --font-body: 'Plus Jakarta Sans', sans-serif;
   
   /* Transitions */
@@ -35,29 +35,29 @@
   --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.15);
   --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.25);
   --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.4);
-  --glass-bg: rgba(24, 27, 36, 0.8);
-  --glass-border: rgba(255, 255, 255, 0.05);
+  --glass-bg: rgba(26, 26, 25, 0.85);
+  --glass-border: rgba(255, 255, 255, 0.03);
 }
 
 /* Light Mode Overrides (Optional Toggle) */
 body.light-mode {
-  --bg-primary: #f8f9fa;
-  --bg-secondary: #f1f3f5;
+  --bg-primary: #fcfbfa;
+  --bg-secondary: #f4f3f0;
   --bg-card: #ffffff;
-  --bg-card-hover: #f8f9fa;
-  --border-color: #e9ecef;
-  --accent: #b08d26;
-  --accent-hover: #c49f30;
-  --accent-glow: rgba(176, 141, 38, 0.1);
+  --bg-card-hover: #fcfbfa;
+  --border-color: #e5e2db;
+  --accent: #9a7d56;
+  --accent-hover: #b0946b;
+  --accent-glow: rgba(154, 125, 86, 0.08);
   
-  --text-primary: #212529;
-  --text-secondary: #495057;
-  --text-muted: #868e96;
+  --text-primary: #2d2b27;
+  --text-secondary: #6e6b63;
+  --text-muted: #9e9b92;
   
-  --glass-bg: rgba(255, 255, 255, 0.8);
-  --glass-border: rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.05);
-  --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.08);
+  --glass-bg: rgba(255, 255, 255, 0.85);
+  --glass-border: rgba(0, 0, 0, 0.03);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.03);
+  --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.05);
 }
 
 /* Base Styles */
