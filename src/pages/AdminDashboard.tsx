@@ -450,7 +450,7 @@ function OverviewTab({ expenses, revenues, products }: OverviewProps) {
                 <BarChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                   <XAxis dataKey="month" stroke="var(--text-muted)" fontSize={11} />
                   <YAxis stroke="var(--text-muted)" fontSize={11} />
-                  <Tooltip contentStyle={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)', color: 'var(--text-primary)' }} />
+                  <Tooltip formatter={(value: any) => ['$' + Number(value).toLocaleString('es-MX', { minimumFractionDigits: 2 }), '']} contentStyle={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)', color: 'var(--text-primary)' }} />
                   <Legend verticalAlign="top" height={36} wrapperStyle={{ fontSize: '12px' }} />
                   <Bar dataKey="ingresos" name="Ingresos" fill="var(--success)" radius={[4, 4, 0, 0]} />
                   <Bar dataKey="gastos" name="Gastos" fill="var(--error)" radius={[4, 4, 0, 0]} />
@@ -485,7 +485,7 @@ function OverviewTab({ expenses, revenues, products }: OverviewProps) {
                         <Cell key={`cell-${index}`} fill={entry.color} />
                       ))}
                     </Pie>
-                    <Tooltip contentStyle={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)', color: 'var(--text-primary)' }} />
+                    <Tooltip formatter={(value: any) => ['$' + Number(value).toLocaleString('es-MX', { minimumFractionDigits: 2 }), 'Gastado']} contentStyle={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)', color: 'var(--text-primary)' }} />
                   </PieChart>
                 </ResponsiveContainer>
               </div>
