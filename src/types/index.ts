@@ -44,6 +44,8 @@ export interface Product {
   stock: number;
   images: string[];
   is_active: boolean;
+  sizes?: string[];
+  category?: string;
   materials?: ProductMaterial[];
   created_at?: string;
 }
@@ -89,5 +91,9 @@ export interface StoreSettings {
   store_subtitle: string;
   instagram_url?: string;
   hero_banner_url?: string;
+  category_corsets_url?: string;
+  category_sueteres_url?: string;
+  category_pantalones_url?: string;
+  category_faldas_url?: string;
   created_at?: string;
 }

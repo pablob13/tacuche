@@ -55,6 +55,8 @@ CREATE TABLE public.products (
     stock INTEGER NOT NULL DEFAULT 0,
     images TEXT[] DEFAULT '{}'::TEXT[],
     is_active BOOLEAN NOT NULL DEFAULT TRUE,
+    sizes TEXT[] DEFAULT '{}'::TEXT[],
+    category TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
@@ -183,7 +185,11 @@ CREATE TABLE IF NOT EXISTS public.store_settings (
   store_title TEXT NOT NULL DEFAULT 'Colección de Autor',
   store_subtitle TEXT NOT NULL DEFAULT 'Prendas exclusivas confeccionadas a mano. Cada pieza es única y diseñada con pasión por nuestro estudio. Cotiza tu pedido y finaliza por WhatsApp.',
   instagram_url TEXT DEFAULT '',
-  hero_banner_url TEXT DEFAULT '',
+  hero_banner_url TEXT DEFAULT 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=1200&auto=format&fit=crop',
+  category_corsets_url TEXT DEFAULT 'https://images.unsplash.com/photo-1618220179428-22790b461013?q=80&w=600&auto=format&fit=crop',
+  category_sueteres_url TEXT DEFAULT 'https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?q=80&w=600&auto=format&fit=crop',
+  category_pantalones_url TEXT DEFAULT 'https://images.unsplash.com/photo-1541099649105-f69ad21f3246?q=80&w=600&auto=format&fit=crop',
+  category_faldas_url TEXT DEFAULT 'https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?q=80&w=600&auto=format&fit=crop',
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 

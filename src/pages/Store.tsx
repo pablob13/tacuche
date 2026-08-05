@@ -294,7 +294,7 @@ export default function Store() {
       }}>
         {/* Background looking model photo */}
         <img 
-          src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=1200&auto=format&fit=crop" 
+          src={settings?.hero_banner_url || "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=1200&auto=format&fit=crop"} 
           alt="Tacuche Lookbook" 
           style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.65, objectPosition: 'center 30%' }}
         />
@@ -389,7 +389,7 @@ export default function Store() {
         }}>
           {/* Category Corsets */}
           <div className="category-card" onClick={() => setFilterDesigner('all')}>
-            <img src="https://images.unsplash.com/photo-1618220179428-22790b461013?q=80&w=600&auto=format&fit=crop" alt="Corsets" />
+            <img src={settings?.category_corsets_url || "https://images.unsplash.com/photo-1618220179428-22790b461013?q=80&w=600&auto=format&fit=crop"} alt="Corsets" />
             <div style={{ position: 'absolute', bottom: '16px', left: '16px', color: '#fff' }}>
               <span style={{ fontSize: '12px', fontWeight: 600, letterSpacing: '2px', textTransform: 'uppercase' }}>Corsets</span>
             </div>
@@ -397,7 +397,7 @@ export default function Store() {
 
           {/* Category Suéteres */}
           <div className="category-card" onClick={() => setFilterDesigner('all')}>
-            <img src="https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?q=80&w=600&auto=format&fit=crop" alt="Suéteres" />
+            <img src={settings?.category_sueteres_url || "https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?q=80&w=600&auto=format&fit=crop"} alt="Suéteres" />
             <div style={{ position: 'absolute', bottom: '16px', left: '16px', color: '#fff' }}>
               <span style={{ fontSize: '12px', fontWeight: 600, letterSpacing: '2px', textTransform: 'uppercase' }}>Suéteres</span>
             </div>
@@ -405,7 +405,7 @@ export default function Store() {
 
           {/* Category Pantalones */}
           <div className="category-card" onClick={() => setFilterDesigner('all')}>
-            <img src="https://images.unsplash.com/photo-1541099649105-f69ad21f3246?q=80&w=600&auto=format&fit=crop" alt="Pantalones" />
+            <img src={settings?.category_pantalones_url || "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?q=80&w=600&auto=format&fit=crop"} alt="Pantalones" />
             <div style={{ position: 'absolute', bottom: '16px', left: '16px', color: '#fff' }}>
               <span style={{ fontSize: '12px', fontWeight: 600, letterSpacing: '2px', textTransform: 'uppercase' }}>Pantalones</span>
             </div>
@@ -413,7 +413,7 @@ export default function Store() {
 
           {/* Category Faldas */}
           <div className="category-card" onClick={() => setFilterDesigner('all')}>
-            <img src="https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?q=80&w=600&auto=format&fit=crop" alt="Faldas" />
+            <img src={settings?.category_faldas_url || "https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?q=80&w=600&auto=format&fit=crop"} alt="Faldas" />
             <div style={{ position: 'absolute', bottom: '16px', left: '16px', color: '#fff' }}>
               <span style={{ fontSize: '12px', fontWeight: 600, letterSpacing: '2px', textTransform: 'uppercase' }}>Faldas</span>
             </div>

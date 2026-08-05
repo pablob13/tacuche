@@ -145,10 +145,26 @@ INSERT INTO public.expenses (id, date, concept, place, amount, paid_by) VALUES
 ('b1a18204-586b-4e8c-8c7c-473d09a25a15', '2026-06-10', 'Ganchos', 'Costco', 399.00, 'Tani');
 
 -- 8. Insert STORE SETTINGS
-INSERT INTO public.store_settings (id, whatsapp_number, store_title, store_subtitle, instagram_url) VALUES
-('main', '525500000000', 'Colección de Autor', 'Prendas exclusivas confeccionadas a mano. Cada pieza es única y diseñada con pasión por nuestro estudio. Cotiza tu pedido y finaliza por WhatsApp.', 'https://instagram.com/tacuche.estudio')
+INSERT INTO public.store_settings (id, whatsapp_number, store_title, store_subtitle, instagram_url, hero_banner_url, category_corsets_url, category_sueteres_url, category_pantalones_url, category_faldas_url) VALUES
+(
+  'main', 
+  '525500000000', 
+  'Colección de Autor', 
+  'Prendas exclusivas confeccionadas a mano. Cada pieza es única y diseñada con pasión por nuestro estudio. Cotiza tu pedido y finaliza por WhatsApp.', 
+  'https://instagram.com/tacuche.estudio',
+  'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=1200&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1618220179428-22790b461013?q=80&w=600&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?q=80&w=600&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1541099649105-f69ad21f3246?q=80&w=600&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?q=80&w=600&auto=format&fit=crop'
+)
 ON CONFLICT (id) DO UPDATE SET
   whatsapp_number = EXCLUDED.whatsapp_number,
   store_title = EXCLUDED.store_title,
   store_subtitle = EXCLUDED.store_subtitle,
-  instagram_url = EXCLUDED.instagram_url;
+  instagram_url = EXCLUDED.instagram_url,
+  hero_banner_url = EXCLUDED.hero_banner_url,
+  category_corsets_url = EXCLUDED.category_corsets_url,
+  category_sueteres_url = EXCLUDED.category_sueteres_url,
+  category_pantalones_url = EXCLUDED.category_pantalones_url,
+  category_faldas_url = EXCLUDED.category_faldas_url;

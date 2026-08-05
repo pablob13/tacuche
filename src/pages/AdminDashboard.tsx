@@ -13,6 +13,7 @@ import {
   Coins,
   Calendar,
   Settings,
+  ShoppingBag,
   LogOut,
   Trash2,
   Edit,
@@ -596,6 +597,16 @@ function CotizadorTab({ insumos, packagingCost, products, onSave }: CotizadorPro
   const [imageUrl, setImageUrl] = useState('');
   const [isActive, setIsActive] = useState(true);
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [sizes, setSizes] = useState<string[]>(['S', 'M', 'L']);
+  const [category, setCategory] = useState<string>('Corsets');
+
+  const handleSizeToggle = (size: string) => {
+    if (sizes.includes(size)) {
+      setSizes(sizes.filter(s => s !== size));
+    } else {
+      setSizes([...sizes, size]);
+    }
+  };
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -669,6 +680,8 @@ function CotizadorTab({ insumos, packagingCost, products, onSave }: CotizadorPro
       setImageUrl('');
       setIsActive(true);
       setMaterials([]);
+      setSizes(['S', 'M', 'L']);
+      setCategory('Corsets');
       return;
     }
 
@@ -686,6 +699,8 @@ function CotizadorTab({ insumos, packagingCost, products, onSave }: CotizadorPro
       setImageUrl(p.images[0] || '');
       setIsActive(p.is_active);
       setMaterials(p.materials || []);
+      setSizes(p.sizes || []);
+      setCategory(p.category || 'Corsets');
     }
   };
 
@@ -773,6 +788,8 @@ function CotizadorTab({ insumos, packagingCost, products, onSave }: CotizadorPro
         stock,
         images: imageUrl ? [imageUrl] : [],
         is_active: isActive,
+        sizes,
+        category,
         materials: materials.map(m => ({
           insumo_id: m.insumo_id,
           quantity_used: m.quantity_used
@@ -949,6 +966,41 @@ function CotizadorTab({ insumos, packagingCost, products, onSave }: CotizadorPro
                 <option value="true">Activo</option>
                 <option value="false">Oculto</option>
               </select>
+            </div>
+          </div>
+
+          {/* Category & Sizes Inputs */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.2fr', gap: '16px' }}>
+            <div className="form-group">
+              <label className="form-label">Categoría de la Prenda</label>
+              <select className="form-select" value={category} onChange={e => setCategory(e.target.value)}>
+                <option value="Corsets">Corsets</option>
+                <option value="Suéteres">Suéteres</option>
+                <option value="Pantalones">Pantalones</option>
+                <option value="Faldas">Faldas / Faldones</option>
+                <option value="Vestidos">Vestidos</option>
+                <option value="Other">Otro / Colección</option>
+              </select>
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">Tallas Disponibles</label>
+              <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginTop: '8px' }}>
+                {['XS', 'S', 'M', 'L', 'XL'].map(size => {
+                  const isChecked = sizes.includes(size);
+                  return (
+                    <label key={size} style={{ display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer', fontSize: '13px' }}>
+                      <input
+                        type="checkbox"
+                        checked={isChecked}
+                        onChange={() => handleSizeToggle(size)}
+                        style={{ width: '16px', height: '16px', accentColor: 'var(--accent)' }}
+                      />
+                      {size}
+                    </label>
+                  );
+                })}
+              </div>
             </div>
           </div>
 
@@ -1145,6 +1197,8 @@ function InventoryTab({ products, onSave }: InventoryProps) {
             <thead>
               <tr style={{ borderBottom: '1px solid var(--border-color)', color: 'var(--text-secondary)' }}>
                 <th style={{ padding: '12px' }}>Prenda</th>
+                <th style={{ padding: '12px' }}>Categoría</th>
+                <th style={{ padding: '12px' }}>Tallas</th>
                 <th style={{ padding: '12px' }}>Diseñador</th>
                 <th style={{ padding: '12px' }}>Efectivo (Cash)</th>
                 <th style={{ padding: '12px' }}>Tarjeta</th>
@@ -1162,6 +1216,24 @@ function InventoryTab({ products, onSave }: InventoryProps) {
                         <img src={p.images[0]} alt={p.name} style={{ width: '40px', height: '40px', objectFit: 'cover', borderRadius: '4px' }} />
                       )}
                       {p.name}
+                    </div>
+                  </td>
+                  <td style={{ padding: '12px', fontWeight: 500 }}>{p.category || 'Corsets'}</td>
+                  <td style={{ padding: '12px' }}>
+                    <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
+                      {(p.sizes || []).map(sz => (
+                        <span key={sz} style={{ 
+                          fontSize: '10px', 
+                          fontWeight: 600, 
+                          padding: '2px 6px', 
+                          border: '1px solid var(--border-color)', 
+                          borderRadius: '4px', 
+                          backgroundColor: 'var(--bg-secondary)', 
+                          color: 'var(--text-primary)' 
+                        }}>
+                          {sz}
+                        </span>
+                      ))}
                     </div>
                   </td>
                   <td style={{ padding: '12px' }}>{p.designer}</td>
@@ -2342,9 +2414,44 @@ function PersonalizarTab({ onSave }: PersonalizarProps) {
   const [title, setTitle] = useState('');
   const [subtitle, setSubtitle] = useState('');
   const [instagram, setInstagram] = useState('');
+  
+  // Custom Images states
+  const [heroUrl, setHeroUrl] = useState('');
+  const [corsetsUrl, setCorsetsUrl] = useState('');
+  const [sueteresUrl, setSueteresUrl] = useState('');
+  const [pantalonesUrl, setPantalonesUrl] = useState('');
+  const [faldasUrl, setFaldasUrl] = useState('');
+
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState(false);
+
+  // Preset Image Options for beautiful Unsplash choices
+  const heroPresets = [
+    { label: 'Modelo Beige Chic', url: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=600&auto=format&fit=crop' },
+    { label: 'Detalle Atelier', url: 'https://images.unsplash.com/photo-1509631179647-0177331693ae?q=80&w=600&auto=format&fit=crop' },
+    { label: 'Estudio Blanco', url: 'https://images.unsplash.com/photo-1595777457583-95e059d581b8?q=80&w=600&auto=format&fit=crop' }
+  ];
+
+  const corsetPresets = [
+    { label: 'Corset Negro', url: 'https://images.unsplash.com/photo-1618220179428-22790b461013?q=80&w=600&auto=format&fit=crop' },
+    { label: 'Corset Lino Blanco', url: 'https://images.unsplash.com/photo-1583496661160-fb488b2c1a82?q=80&w=600&auto=format&fit=crop' }
+  ];
+
+  const sueterPresets = [
+    { label: 'Suéter Negro', url: 'https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?q=80&w=600&auto=format&fit=crop' },
+    { label: 'Suéter Crema', url: 'https://images.unsplash.com/photo-1556905055-8f358a7a47b2?q=80&w=600&auto=format&fit=crop' }
+  ];
+
+  const pantalonPresets = [
+    { label: 'Gabardina Café', url: 'https://images.unsplash.com/photo-1541099649105-f69ad21f3246?q=80&w=600&auto=format&fit=crop' },
+    { label: 'Mezclilla Azul', url: 'https://images.unsplash.com/photo-1542272604-787c3835535d?q=80&w=600&auto=format&fit=crop' }
+  ];
+
+  const faldaPresets = [
+    { label: 'Militar Verde', url: 'https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?q=80&w=600&auto=format&fit=crop' },
+    { label: 'Lino Blanca', url: 'https://images.unsplash.com/photo-1583496661160-fb488b2c1a82?q=80&w=600&auto=format&fit=crop' }
+  ];
 
   useEffect(() => {
     async function loadSettings() {
@@ -2354,6 +2461,11 @@ function PersonalizarTab({ onSave }: PersonalizarProps) {
         setTitle(s.store_title);
         setSubtitle(s.store_subtitle);
         setInstagram(s.instagram_url || '');
+        setHeroUrl(s.hero_banner_url || heroPresets[0].url);
+        setCorsetsUrl(s.category_corsets_url || corsetPresets[0].url);
+        setSueteresUrl(s.category_sueteres_url || sueterPresets[0].url);
+        setPantalonesUrl(s.category_pantalones_url || pantalonPresets[0].url);
+        setFaldasUrl(s.category_faldas_url || faldaPresets[0].url);
       } catch (err) {
         console.error(err);
       } finally {
@@ -2373,7 +2485,12 @@ function PersonalizarTab({ onSave }: PersonalizarProps) {
         whatsapp_number: whatsapp,
         store_title: title,
         store_subtitle: subtitle,
-        instagram_url: instagram
+        instagram_url: instagram,
+        hero_banner_url: heroUrl,
+        category_corsets_url: corsetsUrl,
+        category_sueteres_url: sueteresUrl,
+        category_pantalones_url: pantalonesUrl,
+        category_faldas_url: faldasUrl
       });
       setSuccess(true);
       onSave();
@@ -2391,7 +2508,9 @@ function PersonalizarTab({ onSave }: PersonalizarProps) {
   }
 
   return (
-    <div style={{ maxWidth: '600px' }} className="fade-in">
+    <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: '32px' }} className="fade-in">
+      
+      {/* Editor Form Panel */}
       <div className="card">
         <h3 style={{ fontSize: '18px', color: 'var(--text-primary)', marginBottom: '20px' }}>
           Personalizar Tienda en Línea
@@ -2412,43 +2531,115 @@ function PersonalizarTab({ onSave }: PersonalizarProps) {
         )}
 
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-          <div className="form-group">
-            <label className="form-label">Número de WhatsApp (Ventas)</label>
-            <input
-              type="text"
-              className="form-input"
-              value={whatsapp}
-              onChange={e => setWhatsapp(e.target.value)}
-              required
-              placeholder="Ej: 525512345678 (incluye código de país, sin espacios)"
-            />
-            <span style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '4px', display: 'block' }}>
-              Este es el número al que llegarán los mensajes de checkout cuando un cliente compre prendas. Usa código internacional sin el signo + (Ej: 521... para México).
-            </span>
+          
+          {/* Seccion 1: Datos basicos */}
+          <div style={{ borderBottom: '1px solid var(--border-color)', paddingBottom: '16px' }}>
+            <h4 style={{ fontSize: '14px', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '12px', color: 'var(--accent)' }}>Información General</h4>
+            
+            <div className="form-group" style={{ marginBottom: '12px' }}>
+              <label className="form-label">Número de WhatsApp (Ventas)</label>
+              <input
+                type="text"
+                className="form-input"
+                value={whatsapp}
+                onChange={e => setWhatsapp(e.target.value)}
+                required
+                placeholder="Ej: 525512345678 (código de país, sin +)"
+              />
+            </div>
+
+            <div className="form-group" style={{ marginBottom: '12px' }}>
+              <label className="form-label">Título del Catálogo</label>
+              <input
+                type="text"
+                className="form-input"
+                value={title}
+                onChange={e => setTitle(e.target.value)}
+                required
+              />
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">Subtítulo / Slogan</label>
+              <textarea
+                className="form-input"
+                value={subtitle}
+                onChange={e => setSubtitle(e.target.value)}
+                required
+                style={{ minHeight: '80px', resize: 'vertical' }}
+              />
+            </div>
           </div>
 
-          <div className="form-group">
-            <label className="form-label">Título del Catálogo</label>
-            <input
-              type="text"
-              className="form-input"
-              value={title}
-              onChange={e => setTitle(e.target.value)}
-              required
-              placeholder="Ej: Colección de Autor"
-            />
-          </div>
+          {/* Seccion 2: Imagenes Lookbook */}
+          <div style={{ borderBottom: '1px solid var(--border-color)', paddingBottom: '16px' }}>
+            <h4 style={{ fontSize: '14px', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '12px', color: 'var(--accent)' }}>Imágenes Lookbook (Aesthetic)</h4>
+            
+            {/* Hero Image Selection */}
+            <div className="form-group" style={{ marginBottom: '16px' }}>
+              <label className="form-label">Imagen de Portada (Hero Banner)</label>
+              <input type="text" className="form-input" value={heroUrl} onChange={e => setHeroUrl(e.target.value)} style={{ marginBottom: '6px' }} />
+              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                {heroPresets.map(preset => (
+                  <button key={preset.label} type="button" className="btn btn-secondary" style={{ fontSize: '10px', padding: '4px 8px' }} onClick={() => setHeroUrl(preset.url)}>
+                    {preset.label}
+                  </button>
+                ))}
+              </div>
+            </div>
 
-          <div className="form-group">
-            <label className="form-label">Subtítulo / Slogan de la Tienda</label>
-            <textarea
-              className="form-input"
-              value={subtitle}
-              onChange={e => setSubtitle(e.target.value)}
-              required
-              placeholder="Ej: Confección ética artesanal..."
-              style={{ minHeight: '100px', resize: 'vertical' }}
-            />
+            {/* Corset Card Image selection */}
+            <div className="form-group" style={{ marginBottom: '16px' }}>
+              <label className="form-label">Imagen Categoría: Corsets</label>
+              <input type="text" className="form-input" value={corsetsUrl} onChange={e => setCorsetsUrl(e.target.value)} style={{ marginBottom: '6px' }} />
+              <div style={{ display: 'flex', gap: '8px' }}>
+                {corsetPresets.map(preset => (
+                  <button key={preset.label} type="button" className="btn btn-secondary" style={{ fontSize: '10px', padding: '4px 8px' }} onClick={() => setCorsetsUrl(preset.url)}>
+                    {preset.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Suéter Card Image selection */}
+            <div className="form-group" style={{ marginBottom: '16px' }}>
+              <label className="form-label">Imagen Categoría: Suéteres</label>
+              <input type="text" className="form-input" value={sueteresUrl} onChange={e => setSueteresUrl(e.target.value)} style={{ marginBottom: '6px' }} />
+              <div style={{ display: 'flex', gap: '8px' }}>
+                {sueterPresets.map(preset => (
+                  <button key={preset.label} type="button" className="btn btn-secondary" style={{ fontSize: '10px', padding: '4px 8px' }} onClick={() => setSueteresUrl(preset.url)}>
+                    {preset.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Pantalon Card Image selection */}
+            <div className="form-group" style={{ marginBottom: '16px' }}>
+              <label className="form-label">Imagen Categoría: Pantalones</label>
+              <input type="text" className="form-input" value={pantalonesUrl} onChange={e => setPantalonesUrl(e.target.value)} style={{ marginBottom: '6px' }} />
+              <div style={{ display: 'flex', gap: '8px' }}>
+                {pantalonPresets.map(preset => (
+                  <button key={preset.label} type="button" className="btn btn-secondary" style={{ fontSize: '10px', padding: '4px 8px' }} onClick={() => setPantalonesUrl(preset.url)}>
+                    {preset.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Falda Card Image selection */}
+            <div className="form-group" style={{ marginBottom: '16px' }}>
+              <label className="form-label">Imagen Categoría: Faldas / Novedades</label>
+              <input type="text" className="form-input" value={faldasUrl} onChange={e => setFaldasUrl(e.target.value)} style={{ marginBottom: '6px' }} />
+              <div style={{ display: 'flex', gap: '8px' }}>
+                {faldaPresets.map(preset => (
+                  <button key={preset.label} type="button" className="btn btn-secondary" style={{ fontSize: '10px', padding: '4px 8px' }} onClick={() => setFaldasUrl(preset.url)}>
+                    {preset.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
           </div>
 
           <div className="form-group">
@@ -2467,6 +2658,131 @@ function PersonalizarTab({ onSave }: PersonalizarProps) {
           </button>
         </form>
       </div>
+
+      {/* Live Phone Simulator Panel */}
+      <div style={{ position: 'sticky', top: '100px', height: 'fit-content' }}>
+        <h4 style={{ 
+          fontSize: '12px', 
+          fontWeight: 600, 
+          letterSpacing: '1px', 
+          textTransform: 'uppercase', 
+          marginBottom: '16px',
+          textAlign: 'center',
+          color: 'var(--text-secondary)'
+        }}>
+          Simulador en Vivo (Móvil)
+        </h4>
+
+        {/* Smartphone Frame */}
+        <div style={{
+          width: '320px',
+          height: '560px',
+          border: '12px solid var(--text-primary)',
+          borderRadius: '36px',
+          backgroundColor: '#fdfcfb',
+          boxShadow: '0 20px 40px rgba(0,0,0,0.12)',
+          position: 'relative',
+          overflowY: 'auto',
+          display: 'flex',
+          flexDirection: 'column',
+          fontSize: '12px'
+        }}>
+          {/* Top Speaker/Camera Bezel Notch */}
+          <div style={{
+            position: 'absolute',
+            top: 0,
+            left: '50%',
+            transform: 'translateX(-50%)',
+            width: '110px',
+            height: '16px',
+            backgroundColor: 'var(--text-primary)',
+            borderBottomLeftRadius: '10px',
+            borderBottomRightRadius: '10px',
+            zIndex: 10
+          }}></div>
+
+          {/* Header */}
+          <div style={{
+            padding: '12px 16px',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            borderBottom: '1px solid var(--border-color)',
+            backgroundColor: '#fff',
+            position: 'sticky',
+            top: 0,
+            zIndex: 5
+          }}>
+            <span style={{ fontWeight: 700, fontSize: '11px', letterSpacing: '0.5px' }}>TACUCHE</span>
+            <ShoppingBag size={13} />
+          </div>
+
+          {/* Hero Banner Mock */}
+          <div style={{
+            position: 'relative',
+            height: '170px',
+            backgroundColor: '#111',
+            overflow: 'hidden',
+            flexShrink: 0
+          }}>
+            <img 
+              src={heroUrl || "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=600&auto=format&fit=crop"} 
+              style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.7 }} 
+              alt="Hero Preview"
+            />
+            <div style={{
+              position: 'absolute',
+              bottom: 0,
+              left: 0,
+              right: 0,
+              padding: '12px',
+              background: 'linear-gradient(transparent, rgba(0,0,0,0.85))',
+              width: '100%'
+            }}>
+              <h4 style={{ color: '#fff', margin: '0 0 2px 0', fontSize: '14px', fontFamily: "'Cormorant Garamond', serif" }}>
+                {title || 'Colección de Autor'}
+              </h4>
+              <p style={{ color: '#ddd', margin: 0, fontSize: '8px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {subtitle || 'Slogan...'}
+              </p>
+            </div>
+          </div>
+
+          {/* Popular categories Mock */}
+          <div style={{ padding: '16px', flexShrink: 0 }}>
+            <h5 style={{ textAlign: 'center', margin: '0 0 12px 0', fontSize: '9px', letterSpacing: '1px', textTransform: 'uppercase', fontWeight: 600 }}>Lo Más Popular</h5>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+              
+              <div style={{ height: '80px', borderRadius: '4px', overflow: 'hidden', position: 'relative' }}>
+                <img src={corsetsUrl || "https://images.unsplash.com/photo-1618220179428-22790b461013?q=80&w=600&auto=format&fit=crop"} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="Corsets" />
+                <span style={{ position: 'absolute', bottom: '4px', left: '4px', color: '#fff', fontSize: '8px', fontWeight: 700, textShadow: '0 1px 2px rgba(0,0,0,0.6)' }}>CORSETS</span>
+              </div>
+              
+              <div style={{ height: '80px', borderRadius: '4px', overflow: 'hidden', position: 'relative' }}>
+                <img src={sueteresUrl || "https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?q=80&w=600&auto=format&fit=crop"} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="Suéteres" />
+                <span style={{ position: 'absolute', bottom: '4px', left: '4px', color: '#fff', fontSize: '8px', fontWeight: 700, textShadow: '0 1px 2px rgba(0,0,0,0.6)' }}>SUÉTERES</span>
+              </div>
+              
+              <div style={{ height: '80px', borderRadius: '4px', overflow: 'hidden', position: 'relative' }}>
+                <img src={pantalonesUrl || "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?q=80&w=600&auto=format&fit=crop"} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="Jeans" />
+                <span style={{ position: 'absolute', bottom: '4px', left: '4px', color: '#fff', fontSize: '8px', fontWeight: 700, textShadow: '0 1px 2px rgba(0,0,0,0.6)' }}>JEANS</span>
+              </div>
+              
+              <div style={{ height: '80px', borderRadius: '4px', overflow: 'hidden', position: 'relative' }}>
+                <img src={faldasUrl || "https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?q=80&w=600&auto=format&fit=crop"} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="Faldas" />
+                <span style={{ position: 'absolute', bottom: '4px', left: '4px', color: '#fff', fontSize: '8px', fontWeight: 700, textShadow: '0 1px 2px rgba(0,0,0,0.6)' }}>FALDAS</span>
+              </div>
+
+            </div>
+          </div>
+
+          {/* Small scroll spacer indicator */}
+          <div style={{ padding: '8px', textAlign: 'center', color: '#aaa', fontSize: '8px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+            Desliza para ver catálogo ↓
+          </div>
+        </div>
+      </div>
+
     </div>
   );
 }
