@@ -128,7 +128,7 @@ export default function Store() {
         alignItems: 'center'
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <img src="/logo.png" alt="TACUCHE" style={{ height: '48px', objectFit: 'contain' }} />
+          <img src="/logo-black.png" alt="TACUCHE" style={{ height: '48px', objectFit: 'contain' }} />
           <span style={{
             fontSize: '11px',
             letterSpacing: '1px',

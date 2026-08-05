@@ -111,7 +111,7 @@ export default function AdminDashboard() {
         gap: '32px'
       }}>
         <div>
-          <img src="/logo.png" alt="TACUCHE" style={{ height: '36px', objectFit: 'contain', marginBottom: '12px', display: 'block' }} />
+          <img src="/logo-black.png" alt="TACUCHE" style={{ height: '36px', objectFit: 'contain', marginBottom: '12px', display: 'block' }} />
           <span style={{ fontSize: '11px', color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '1.5px', display: 'block' }}>
             Panel de Control
           </span>
@@ -206,7 +206,7 @@ export default function AdminDashboard() {
           backgroundColor: 'var(--bg-secondary)'
         }}>
           <div>
-            <h1 style={{ fontSize: '22px', margin: 0, color: '#fff' }}>
+            <h1 style={{ fontSize: '22px', margin: 0, color: 'var(--text-primary)' }}>
               {currentTab === 'overview' && 'Resumen Financiero y Dashboards'}
               {currentTab === 'cotizador' && 'Cotizador de Prendas y Fórmulas'}
               {currentTab === 'inventory' && 'Inventario de Ropa'}
@@ -372,7 +372,7 @@ function OverviewTab({ expenses, revenues, products }: OverviewProps) {
           </div>
           <div>
             <span style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>Ingresos Totales</span>
-            <h3 style={{ fontSize: '24px', color: '#fff' }}>${totalRevenues.toLocaleString('es-MX')}</h3>
+            <h3 style={{ fontSize: '24px', color: 'var(--text-primary)' }}>${totalRevenues.toLocaleString('es-MX')}</h3>
           </div>
         </div>
 
@@ -382,7 +382,7 @@ function OverviewTab({ expenses, revenues, products }: OverviewProps) {
           </div>
           <div>
             <span style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>Gastos Totales</span>
-            <h3 style={{ fontSize: '24px', color: '#fff' }}>${totalExpenses.toLocaleString('es-MX')}</h3>
+            <h3 style={{ fontSize: '24px', color: 'var(--text-primary)' }}>${totalExpenses.toLocaleString('es-MX')}</h3>
           </div>
         </div>
 
@@ -398,7 +398,7 @@ function OverviewTab({ expenses, revenues, products }: OverviewProps) {
           </div>
           <div>
             <span style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>Utilidad Neta Real</span>
-            <h3 style={{ fontSize: '24px', color: '#fff' }}>${netProfit.toLocaleString('es-MX')}</h3>
+            <h3 style={{ fontSize: '24px', color: 'var(--text-primary)' }}>${netProfit.toLocaleString('es-MX')}</h3>
           </div>
         </div>
 
@@ -408,7 +408,7 @@ function OverviewTab({ expenses, revenues, products }: OverviewProps) {
           </div>
           <div>
             <span style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>Prendas en Catálogo</span>
-            <h3 style={{ fontSize: '24px', color: '#fff' }}>{products.length}</h3>
+            <h3 style={{ fontSize: '24px', color: 'var(--text-primary)' }}>{products.length}</h3>
           </div>
         </div>
 
@@ -419,7 +419,7 @@ function OverviewTab({ expenses, revenues, products }: OverviewProps) {
         
         {/* Income vs Expenses Bar Chart */}
         <div className="card" style={{ minHeight: '350px' }}>
-          <h3 style={{ fontSize: '18px', color: '#fff', marginBottom: '20px' }}>Ingresos vs Gastos Mensuales</h3>
+          <h3 style={{ fontSize: '18px', color: 'var(--text-primary)', marginBottom: '20px' }}>Ingresos vs Gastos Mensuales</h3>
           {chartData.length === 0 ? (
             <div className="flex-center" style={{ height: '80%', color: 'var(--text-muted)' }}>
               No hay datos financieros registrados todavía.
@@ -430,7 +430,7 @@ function OverviewTab({ expenses, revenues, products }: OverviewProps) {
                 <BarChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                   <XAxis dataKey="month" stroke="var(--text-muted)" fontSize={11} />
                   <YAxis stroke="var(--text-muted)" fontSize={11} />
-                  <Tooltip contentStyle={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)', color: '#fff' }} />
+                  <Tooltip contentStyle={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)', color: 'var(--text-primary)' }} />
                   <Legend verticalAlign="top" height={36} wrapperStyle={{ fontSize: '12px' }} />
                   <Bar dataKey="ingresos" name="Ingresos" fill="var(--success)" radius={[4, 4, 0, 0]} />
                   <Bar dataKey="gastos" name="Gastos" fill="var(--error)" radius={[4, 4, 0, 0]} />
@@ -442,7 +442,7 @@ function OverviewTab({ expenses, revenues, products }: OverviewProps) {
 
         {/* Expenses Paid By Pie Chart */}
         <div className="card" style={{ minHeight: '350px', display: 'flex', flexDirection: 'column' }}>
-          <h3 style={{ fontSize: '18px', color: '#fff', marginBottom: '20px' }}>Inversión / Gastos por Socio</h3>
+          <h3 style={{ fontSize: '18px', color: 'var(--text-primary)', marginBottom: '20px' }}>Inversión / Gastos por Socio</h3>
           {expensesPieData.length === 0 ? (
             <div className="flex-center" style={{ height: '80%', color: 'var(--text-muted)' }}>
               Sin egresos registrados.
@@ -465,7 +465,7 @@ function OverviewTab({ expenses, revenues, products }: OverviewProps) {
                         <Cell key={`cell-${index}`} fill={entry.color} />
                       ))}
                     </Pie>
-                    <Tooltip contentStyle={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)', color: '#fff' }} />
+                    <Tooltip contentStyle={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)', color: 'var(--text-primary)' }} />
                   </PieChart>
                 </ResponsiveContainer>
               </div>
@@ -478,7 +478,7 @@ function OverviewTab({ expenses, revenues, products }: OverviewProps) {
                       <span style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: d.color }}></span>
                       <span style={{ color: 'var(--text-secondary)' }}>{d.name}</span>
                     </div>
-                    <strong style={{ color: '#fff' }}>${d.value.toLocaleString('es-MX')}</strong>
+                    <strong style={{ color: 'var(--text-primary)' }}>${d.value.toLocaleString('es-MX')}</strong>
                   </div>
                 ))}
               </div>
@@ -490,7 +490,7 @@ function OverviewTab({ expenses, revenues, products }: OverviewProps) {
 
       {/* Warnings & Low Stock Section */}
       <div className="card">
-        <h3 style={{ fontSize: '18px', color: '#fff', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <h3 style={{ fontSize: '18px', color: 'var(--text-primary)', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
           <AlertTriangle className="text-accent" size={18} />
           Alertas de Stock e Inventario Bajo
         </h3>
@@ -512,7 +512,7 @@ function OverviewTab({ expenses, revenues, products }: OverviewProps) {
                 alignItems: 'center'
               }}>
                 <div>
-                  <h4 style={{ fontSize: '14px', color: '#fff', margin: 0 }}>{p.name}</h4>
+                  <h4 style={{ fontSize: '14px', color: 'var(--text-primary)', margin: 0 }}>{p.name}</h4>
                   <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Diseñador: {p.designer}</span>
                 </div>
                 <strong style={{
@@ -761,7 +761,7 @@ function CotizadorTab({ insumos, packagingCost, products, onSave }: CotizadorPro
       {/* Editor Column */}
       <div className="card">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-          <h3 style={{ fontSize: '18px', color: '#fff' }}>Editor de Fórmulas y Costos</h3>
+          <h3 style={{ fontSize: '18px', color: 'var(--text-primary)' }}>Editor de Fórmulas y Costos</h3>
           
           <select
             className="form-select"
@@ -821,7 +821,7 @@ function CotizadorTab({ insumos, packagingCost, products, onSave }: CotizadorPro
 
           {/* Add materials section */}
           <div style={{ border: '1px solid var(--border-color)', borderRadius: '8px', padding: '16px', backgroundColor: 'var(--bg-secondary)' }}>
-            <h4 style={{ fontSize: '14px', color: '#fff', marginBottom: '12px' }}>Materiales e Insumos Añadidos</h4>
+            <h4 style={{ fontSize: '14px', color: 'var(--text-primary)', marginBottom: '12px' }}>Materiales e Insumos Añadidos</h4>
             
             <div style={{ display: 'flex', gap: '12px', marginBottom: '16px' }}>
               <select
@@ -953,7 +953,7 @@ function CotizadorTab({ insumos, packagingCost, products, onSave }: CotizadorPro
                     backgroundColor: 'rgba(0,0,0,0.6)',
                     border: 'none',
                     borderRadius: '50%',
-                    color: '#fff',
+                    color: 'var(--text-primary)',
                     width: '20px',
                     height: '20px',
                     cursor: 'pointer',
@@ -986,7 +986,7 @@ function CotizadorTab({ insumos, packagingCost, products, onSave }: CotizadorPro
         justifyContent: 'space-between'
       }}>
         <div>
-          <h3 style={{ fontSize: '18px', color: '#fff', marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <h3 style={{ fontSize: '18px', color: 'var(--text-primary)', marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '8px' }}>
             <Calculator size={20} className="text-accent" />
             Desglose de Costos de la Prenda
           </h3>
@@ -995,22 +995,22 @@ function CotizadorTab({ insumos, packagingCost, products, onSave }: CotizadorPro
             
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px' }}>
               <span className="text-muted">Costo Base Inicial:</span>
-              <strong style={{ color: '#fff' }}>${baseCost.toFixed(2)}</strong>
+              <strong style={{ color: 'var(--text-primary)' }}>${baseCost.toFixed(2)}</strong>
             </div>
 
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px' }}>
               <span className="text-muted">Insumos y Materiales:</span>
-              <strong style={{ color: '#fff' }}>${totalMaterialsCost.toFixed(2)}</strong>
+              <strong style={{ color: 'var(--text-primary)' }}>${totalMaterialsCost.toFixed(2)}</strong>
             </div>
 
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px' }}>
               <span className="text-muted">Mano de Obra Confección ({laborHours} hrs x ${laborHourlyRate}):</span>
-              <strong style={{ color: '#fff' }}>${totalLaborCost.toFixed(2)}</strong>
+              <strong style={{ color: 'var(--text-primary)' }}>${totalLaborCost.toFixed(2)}</strong>
             </div>
 
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px' }}>
               <span className="text-muted">Packaging / Envase:</span>
-              <strong style={{ color: '#fff' }}>${selectedPackagingCost.toFixed(2)}</strong>
+              <strong style={{ color: 'var(--text-primary)' }}>${selectedPackagingCost.toFixed(2)}</strong>
             </div>
 
             <div style={{
@@ -1030,7 +1030,7 @@ function CotizadorTab({ insumos, packagingCost, products, onSave }: CotizadorPro
 
         {/* Sales prices calculations */}
         <div style={{ marginTop: '24px', backgroundColor: 'var(--bg-secondary)', padding: '20px', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
-          <h4 style={{ fontSize: '14px', color: '#fff', marginBottom: '14px' }}>Precios de Venta Calculados</h4>
+          <h4 style={{ fontSize: '14px', color: 'var(--text-primary)', marginBottom: '14px' }}>Precios de Venta Calculados</h4>
           
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             
@@ -1050,7 +1050,7 @@ function CotizadorTab({ insumos, packagingCost, products, onSave }: CotizadorPro
             <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '12px', marginTop: '4px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <span style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>Precio de Venta Tarjeta:</span>
-                <strong style={{ fontSize: '18px', color: '#fff' }}>${priceCard.toLocaleString('es-MX')}</strong>
+                <strong style={{ fontSize: '18px', color: 'var(--text-primary)' }}>${priceCard.toLocaleString('es-MX')}</strong>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px' }}>
                 <span>Comisión de tarjeta (4.06%): -${cardCommission.toFixed(2)}</span>
@@ -1099,7 +1099,7 @@ function InventoryTab({ products, onSave }: InventoryProps) {
 
   return (
     <div className="card">
-      <h3 style={{ fontSize: '18px', color: '#fff', marginBottom: '20px' }}>Inventario de Prendas</h3>
+      <h3 style={{ fontSize: '18px', color: 'var(--text-primary)', marginBottom: '20px' }}>Inventario de Prendas</h3>
       
       {products.length === 0 ? (
         <p className="text-muted">No hay productos en inventario.</p>
@@ -1120,7 +1120,7 @@ function InventoryTab({ products, onSave }: InventoryProps) {
             <tbody>
               {products.map(p => (
                 <tr key={p.id} style={{ borderBottom: '1px solid var(--border-color)', verticalAlign: 'middle' }}>
-                  <td style={{ padding: '16px 12px', fontWeight: 600, color: '#fff' }}>
+                  <td style={{ padding: '16px 12px', fontWeight: 600, color: 'var(--text-primary)' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                       {p.images && p.images[0] && (
                         <img src={p.images[0]} alt={p.name} style={{ width: '40px', height: '40px', objectFit: 'cover', borderRadius: '4px' }} />
@@ -1133,9 +1133,9 @@ function InventoryTab({ products, onSave }: InventoryProps) {
                   <td style={{ padding: '12px' }}>${p.price_card?.toLocaleString('es-MX')}</td>
                   <td style={{ padding: '12px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-                      <button onClick={() => handleStockChange(p, -1)} style={{ width: '24px', height: '24px', borderRadius: '4px', border: '1px solid var(--border-color)', background: 'none', color: '#fff', cursor: 'pointer' }}>-</button>
+                      <button onClick={() => handleStockChange(p, -1)} style={{ width: '24px', height: '24px', borderRadius: '4px', border: '1px solid var(--border-color)', background: 'none', color: 'var(--text-primary)', cursor: 'pointer' }}>-</button>
                       <strong style={{ minWidth: '24px', textAlign: 'center' }}>{p.stock}</strong>
-                      <button onClick={() => handleStockChange(p, 1)} style={{ width: '24px', height: '24px', borderRadius: '4px', border: '1px solid var(--border-color)', background: 'none', color: '#fff', cursor: 'pointer' }}>+</button>
+                      <button onClick={() => handleStockChange(p, 1)} style={{ width: '24px', height: '24px', borderRadius: '4px', border: '1px solid var(--border-color)', background: 'none', color: 'var(--text-primary)', cursor: 'pointer' }}>+</button>
                     </div>
                   </td>
                   <td style={{ padding: '12px' }}>
@@ -1233,7 +1233,7 @@ function InsumosTab({ insumos, onSave }: InsumosProps) {
       
       {/* Form */}
       <div className="card">
-        <h3 style={{ fontSize: '18px', color: '#fff', marginBottom: '20px' }}>
+        <h3 style={{ fontSize: '18px', color: 'var(--text-primary)', marginBottom: '20px' }}>
           {editId ? 'Editar Insumo' : 'Registrar Insumo'}
         </h3>
         
@@ -1293,7 +1293,7 @@ function InsumosTab({ insumos, onSave }: InsumosProps) {
 
       {/* List */}
       <div className="card">
-        <h3 style={{ fontSize: '18px', color: '#fff', marginBottom: '20px' }}>Lista de Insumos</h3>
+        <h3 style={{ fontSize: '18px', color: 'var(--text-primary)', marginBottom: '20px' }}>Lista de Insumos</h3>
         
         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
           <thead>
@@ -1309,7 +1309,7 @@ function InsumosTab({ insumos, onSave }: InsumosProps) {
           <tbody>
             {insumos.map(i => (
               <tr key={i.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
-                <td style={{ padding: '12px 8px', fontWeight: 600, color: '#fff' }}>{i.name}</td>
+                <td style={{ padding: '12px 8px', fontWeight: 600, color: 'var(--text-primary)' }}>{i.name}</td>
                 <td style={{ padding: '12px 8px' }}>{i.quantity_per_unit} {i.unit}</td>
                 <td style={{ padding: '12px 8px' }}>${i.price.toFixed(2)}</td>
                 <td style={{ padding: '12px 8px', color: 'var(--accent)' }}>
@@ -1396,7 +1396,7 @@ function PackagingTab({ packaging, onSave }: PackagingProps) {
       {/* Form */}
       <div className="card" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
         <div>
-          <h3 style={{ fontSize: '18px', color: '#fff', marginBottom: '20px' }}>
+          <h3 style={{ fontSize: '18px', color: 'var(--text-primary)', marginBottom: '20px' }}>
             {editId ? 'Editar Elemento Packaging' : 'Añadir Elemento Packaging'}
           </h3>
           
@@ -1445,7 +1445,7 @@ function PackagingTab({ packaging, onSave }: PackagingProps) {
 
       {/* List */}
       <div className="card">
-        <h3 style={{ fontSize: '18px', color: '#fff', marginBottom: '20px' }}>Lista de Componentes</h3>
+        <h3 style={{ fontSize: '18px', color: 'var(--text-primary)', marginBottom: '20px' }}>Lista de Componentes</h3>
         
         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
           <thead>
@@ -1461,7 +1461,7 @@ function PackagingTab({ packaging, onSave }: PackagingProps) {
           <tbody>
             {packaging.map(item => (
               <tr key={item.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
-                <td style={{ padding: '12px 8px', fontWeight: 600, color: '#fff' }}>{item.name}</td>
+                <td style={{ padding: '12px 8px', fontWeight: 600, color: 'var(--text-primary)' }}>{item.name}</td>
                 <td style={{ padding: '12px 8px' }}>${item.price.toFixed(2)} ({item.unit})</td>
                 <td style={{ padding: '12px 8px' }}>{item.units_required}</td>
                 <td style={{ padding: '12px 8px' }}>{item.capacity_max}</td>
@@ -1549,7 +1549,7 @@ function ExpensesTab({ expenses, onSave }: ExpensesProps) {
       
       {/* Form */}
       <div className="card">
-        <h3 style={{ fontSize: '18px', color: '#fff', marginBottom: '20px' }}>Registrar Gasto</h3>
+        <h3 style={{ fontSize: '18px', color: 'var(--text-primary)', marginBottom: '20px' }}>Registrar Gasto</h3>
         
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <div className="form-group">
@@ -1591,7 +1591,7 @@ function ExpensesTab({ expenses, onSave }: ExpensesProps) {
 
       {/* List */}
       <div className="card">
-        <h3 style={{ fontSize: '18px', color: '#fff', marginBottom: '20px' }}>Historial de Egresos</h3>
+        <h3 style={{ fontSize: '18px', color: 'var(--text-primary)', marginBottom: '20px' }}>Historial de Egresos</h3>
         
         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
           <thead>
@@ -1608,7 +1608,7 @@ function ExpensesTab({ expenses, onSave }: ExpensesProps) {
             {expenses.map(e => (
               <tr key={e.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
                 <td style={{ padding: '12px 8px' }}>{e.date}</td>
-                <td style={{ padding: '12px 8px', fontWeight: 600, color: '#fff' }}>{e.concept}</td>
+                <td style={{ padding: '12px 8px', fontWeight: 600, color: 'var(--text-primary)' }}>{e.concept}</td>
                 <td style={{ padding: '12px 8px' }}>{e.place || '-'}</td>
                 <td style={{ padding: '12px 8px' }}>
                   <span style={{
@@ -1748,7 +1748,7 @@ function RevenuesTab({ revenues, products, onSave }: RevenuesProps) {
       
       {/* Form */}
       <div className="card">
-        <h3 style={{ fontSize: '18px', color: '#fff', marginBottom: '20px' }}>Registrar Venta / Ingreso</h3>
+        <h3 style={{ fontSize: '18px', color: 'var(--text-primary)', marginBottom: '20px' }}>Registrar Venta / Ingreso</h3>
         
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <div className="form-group">
@@ -1809,7 +1809,7 @@ function RevenuesTab({ revenues, products, onSave }: RevenuesProps) {
 
       {/* List */}
       <div className="card">
-        <h3 style={{ fontSize: '18px', color: '#fff', marginBottom: '20px' }}>Historial de Ventas</h3>
+        <h3 style={{ fontSize: '18px', color: 'var(--text-primary)', marginBottom: '20px' }}>Historial de Ventas</h3>
         
         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
           <thead>
@@ -1827,7 +1827,7 @@ function RevenuesTab({ revenues, products, onSave }: RevenuesProps) {
             {revenues.map(r => (
               <tr key={r.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
                 <td style={{ padding: '12px 8px' }}>{r.date}</td>
-                <td style={{ padding: '12px 8px', fontWeight: 600, color: '#fff' }}>
+                <td style={{ padding: '12px 8px', fontWeight: 600, color: 'var(--text-primary)' }}>
                   {r.product_name} {r.quantity > 1 && `(x${r.quantity})`}
                   {r.notes && <span style={{ display: 'block', fontSize: '11px', fontWeight: 'normal', color: 'var(--text-muted)' }}>{r.notes}</span>}
                 </td>
