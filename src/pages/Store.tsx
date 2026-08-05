@@ -128,18 +128,7 @@ export default function Store() {
         alignItems: 'center'
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <h1 style={{
-            fontSize: '28px',
-            margin: 0,
-            letterSpacing: '2px',
-            fontWeight: 700,
-            background: 'linear-gradient(to right, #fff, var(--accent))',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            fontFamily: 'var(--font-heading)'
-          }}>
-            TACUCHE
-          </h1>
+          <img src="/logo.png" alt="TACUCHE" style={{ height: '48px', objectFit: 'contain' }} />
           <span style={{
             fontSize: '11px',
             letterSpacing: '1px',
