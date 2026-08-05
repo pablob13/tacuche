@@ -1442,6 +1442,9 @@ function InsumosTab({ insumos, onSave }: InsumosProps) {
 // ==========================================
 // 4.5 CALENDAR EVENTS TAB
 // ==========================================
+// ==========================================
+// 4.5 CALENDAR EVENTS TAB (Monthly Grid Layout)
+// ==========================================
 interface CalendarProps {
   events: CalendarEvent[];
   onSave: () => void;
@@ -1454,6 +1457,32 @@ function CalendarTab({ events, onSave }: CalendarProps) {
   const [category, setCategory] = useState<'Production' | 'Bazar' | 'Fitting' | 'Photo Shoot' | 'Launch' | 'Other'>('Production');
   const [status, setStatus] = useState<'Pending' | 'Completed'>('Pending');
   const [editId, setEditId] = useState<string | null>(null);
+
+  // Month navigation state
+  const [currentDate, setCurrentDate] = useState(new Date());
+  const currentMonth = currentDate.getMonth();
+  const currentYear = currentDate.getFullYear();
+
+  const handlePrevMonth = () => {
+    setCurrentDate(new Date(currentYear, currentMonth - 1, 1));
+  };
+
+  const handleNextMonth = () => {
+    setCurrentDate(new Date(currentYear, currentMonth + 1, 1));
+  };
+
+  const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+  // Start day: 0 = Mon, 1 = Tue, ..., 6 = Sun
+  const getStartDay = () => {
+    const day = new Date(currentYear, currentMonth, 1).getDay();
+    return day === 0 ? 6 : day - 1;
+  };
+  const startDay = getStartDay();
+
+  const monthNames = [
+    'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+    'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+  ];
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -1504,22 +1533,36 @@ function CalendarTab({ events, onSave }: CalendarProps) {
 
   const getCategoryColor = (cat: string) => {
     switch (cat) {
-      case 'Production': return { bg: 'rgba(143, 159, 135, 0.15)', text: '#8f9f87', label: 'Producción' };
-      case 'Bazar': return { bg: 'rgba(197, 139, 104, 0.15)', text: '#c58b68', label: 'Bazar' };
-      case 'Fitting': return { bg: 'rgba(154, 125, 86, 0.15)', text: '#9a7d56', label: 'Prueba Tallas' };
-      case 'Photo Shoot': return { bg: 'rgba(197, 168, 128, 0.15)', text: '#c5a880', label: 'Sesión Fotos' };
-      case 'Launch': return { bg: 'rgba(219, 123, 95, 0.15)', text: '#db7b5f', label: 'Lanzamiento' };
-      default: return { bg: 'rgba(158, 155, 146, 0.15)', text: '#9e9b92', label: 'Otro' };
+      case 'Production': return { bg: '#8f9f87', text: '#fff', label: 'Prod' };
+      case 'Bazar': return { bg: '#c58b68', text: '#fff', label: 'Bazar' };
+      case 'Fitting': return { bg: '#9a7d56', text: '#fff', label: 'Fit' };
+      case 'Photo Shoot': return { bg: '#c5a880', text: '#fff', label: 'Foto' };
+      case 'Launch': return { bg: '#db7b5f', text: '#fff', label: 'Launch' };
+      default: return { bg: '#9e9b92', text: '#fff', label: 'Otro' };
     }
   };
 
-  // Group events by date (sorted chronological)
-  const sortedEvents = [...events].sort((a, b) => a.date.localeCompare(b.date));
+  const getEventsForDay = (day: number) => {
+    const dateString = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    return events.filter(ev => ev.date === dateString);
+  };
+
+  // Generate grid cells array
+  const gridCells = [];
+  for (let i = 0; i < startDay; i++) {
+    gridCells.push(null);
+  }
+  for (let i = 1; i <= daysInMonth; i++) {
+    gridCells.push(i);
+  }
+
+  const weekdays = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.6fr', gap: '32px' }}>
-      {/* Form */}
-      <div className="card">
+    <div style={{ display: 'grid', gridTemplateColumns: '320px 1fr', gap: '32px' }}>
+      
+      {/* Event Form Column */}
+      <div className="card" style={{ height: 'fit-content' }}>
         <h3 style={{ fontSize: '18px', color: 'var(--text-primary)', marginBottom: '20px' }}>
           {editId ? 'Editar Evento' : 'Programar Evento'}
         </h3>
@@ -1527,121 +1570,226 @@ function CalendarTab({ events, onSave }: CalendarProps) {
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <div className="form-group">
             <label className="form-label">Título del Evento</label>
-            <input type="text" className="form-input" value={title} onChange={e => setTitle(e.target.value)} required placeholder="Ej: Lanzamiento colección verano" />
+            <input 
+              type="text" 
+              className="form-input" 
+              value={title} 
+              onChange={e => setTitle(e.target.value)} 
+              required 
+              placeholder="Ej: Bazar de Diseño Roma" 
+            />
           </div>
 
           <div className="form-group">
             <label className="form-label">Fecha</label>
-            <input type="date" className="form-input" value={date} onChange={e => setDate(e.target.value)} required />
+            <input 
+              type="date" 
+              className="form-input" 
+              value={date} 
+              onChange={e => setDate(e.target.value)} 
+              required 
+            />
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-            <div className="form-group">
-              <label className="form-label">Categoría</label>
-              <select className="form-select" value={category} onChange={e => setCategory(e.target.value as any)}>
-                <option value="Launch">Lanzamiento</option>
-                <option value="Photo Shoot">Sesión de Fotos</option>
-                <option value="Bazar">Bazar / Evento</option>
-                <option value="Production">Producción</option>
-                <option value="Fitting">Prueba Tallas</option>
-                <option value="Other">Otro</option>
-              </select>
-            </div>
+          <div className="form-group">
+            <label className="form-label">Categoría</label>
+            <select className="form-select" value={category} onChange={e => setCategory(e.target.value as any)}>
+              <option value="Launch">Lanzamiento</option>
+              <option value="Photo Shoot">Sesión de Fotos</option>
+              <option value="Bazar">Bazar / Evento</option>
+              <option value="Production">Producción</option>
+              <option value="Fitting">Prueba Tallas (Fitting)</option>
+              <option value="Other">Otro</option>
+            </select>
+          </div>
 
-            <div className="form-group">
-              <label className="form-label">Estado</label>
-              <select className="form-select" value={status} onChange={e => setStatus(e.target.value as any)}>
-                <option value="Pending">Pendiente</option>
-                <option value="Completed">Completado</option>
-              </select>
-            </div>
+          <div className="form-group">
+            <label className="form-label">Estado</label>
+            <select className="form-select" value={status} onChange={e => setStatus(e.target.value as any)}>
+              <option value="Pending">Pendiente</option>
+              <option value="Completed">Completado</option>
+            </select>
           </div>
 
           <div className="form-group">
             <label className="form-label">Notas / Descripción</label>
-            <textarea className="form-input" value={description} onChange={e => setDescription(e.target.value)} placeholder="Agrega notas adicionales del evento..." style={{ minHeight: '80px', resize: 'vertical' }} />
+            <textarea 
+              className="form-input" 
+              value={description} 
+              onChange={e => setDescription(e.target.value)} 
+              placeholder="Notas del lanzamiento o detalles de entrega..." 
+              style={{ minHeight: '60px', resize: 'vertical' }} 
+            />
           </div>
 
-          <button type="submit" className="btn btn-primary" style={{ marginTop: '8px' }}>
-            {editId ? 'Guardar Cambios' : 'Agendar Evento'}
-          </button>
-          
-          {editId && (
-            <button type="button" onClick={() => {
-              setEditId(null);
-              setTitle('');
-              setDescription('');
-              setDate('');
-              setCategory('Production');
-              setStatus('Pending');
-            }} className="btn btn-secondary">
-              Cancelar
+          <div style={{ display: 'flex', gap: '8px', marginTop: '4px', flexWrap: 'wrap' }}>
+            <button type="submit" className="btn btn-primary" style={{ flex: 1, padding: '10px', minWidth: '100px' }}>
+              {editId ? 'Guardar' : 'Agendar'}
             </button>
-          )}
+            {editId && (
+              <>
+                <button 
+                  type="button" 
+                  onClick={() => handleDelete(editId)}
+                  className="btn btn-danger"
+                  style={{ padding: '10px' }}
+                >
+                  Eliminar
+                </button>
+                <button 
+                  type="button" 
+                  onClick={() => {
+                    setEditId(null);
+                    setTitle('');
+                    setDescription('');
+                    setDate('');
+                    setCategory('Production');
+                    setStatus('Pending');
+                  }} 
+                  className="btn btn-secondary"
+                  style={{ padding: '10px' }}
+                >
+                  Cancelar
+                </button>
+              </>
+            )}
+          </div>
         </form>
       </div>
 
-      {/* Agenda list */}
+      {/* Monthly Grid Column */}
       <div className="card" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-        <h3 style={{ fontSize: '18px', color: 'var(--text-primary)' }}>Calendario de Actividades</h3>
         
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', maxHeight: '550px', overflowY: 'auto', paddingRight: '4px' }}>
-          {sortedEvents.map(ev => {
-            const colors = getCategoryColor(ev.category);
-            return (
-              <div key={ev.id} className="glass" style={{
-                padding: '16px',
-                borderRadius: '8px',
-                border: `1px solid ${ev.status === 'Completed' ? 'var(--success-glow)' : 'var(--border-color)'}`,
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                gap: '16px'
-              }}>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                    <span style={{
-                      backgroundColor: colors.bg,
-                      color: colors.text,
-                      fontSize: '11px',
-                      fontWeight: 600,
-                      padding: '2px 8px',
-                      borderRadius: '4px',
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.5px'
-                    }}>
-                      {colors.label}
-                    </span>
-                    <span style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 500 }}>
-                      {new Date(ev.date + 'T00:00:00').toLocaleDateString('es-MX', { weekday: 'short', day: 'numeric', month: 'short' })}
-                    </span>
-                    {ev.status === 'Completed' && (
-                      <span style={{ color: 'var(--success)', fontSize: '11px', fontWeight: 600 }}>✓ Completado</span>
-                    )}
-                  </div>
-                  <h4 style={{ fontSize: '15px', color: 'var(--text-primary)', margin: 0, fontWeight: 600 }}>{ev.title}</h4>
-                  {ev.description && (
-                    <p style={{ fontSize: '12px', color: 'var(--text-secondary)', margin: 0 }}>{ev.description}</p>
-                  )}
-                </div>
+        {/* Month Header and controls */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <h3 style={{ fontSize: '20px', color: 'var(--text-primary)', fontFamily: 'var(--font-heading)', fontWeight: 600 }}>
+            {monthNames[currentMonth]} {currentYear}
+          </h3>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <button className="btn btn-secondary" onClick={handlePrevMonth} style={{ padding: '6px 12px' }}>
+              &larr; Ant
+            </button>
+            <button className="btn btn-secondary" onClick={handleNextMonth} style={{ padding: '6px 12px' }}>
+              Sig &rarr;
+            </button>
+          </div>
+        </div>
 
-                <div style={{ display: 'flex', gap: '8px' }}>
-                  <button onClick={() => handleEdit(ev)} className="btn btn-secondary" style={{ padding: '6px 10px', fontSize: '12px' }}>
-                    <Edit size={14} />
-                  </button>
-                  <button onClick={() => handleDelete(ev.id)} className="btn btn-danger" style={{ padding: '6px 10px', fontSize: '12px' }}>
-                    <Trash2 size={14} />
-                  </button>
+        {/* Weekly Header row */}
+        <div style={{ 
+          display: 'grid', 
+          gridTemplateColumns: 'repeat(7, 1fr)', 
+          textAlign: 'center', 
+          borderBottom: '1px solid var(--border-color)',
+          paddingBottom: '8px',
+          fontWeight: 600,
+          color: 'var(--text-secondary)',
+          fontSize: '12px',
+          letterSpacing: '1px',
+          textTransform: 'uppercase'
+        }}>
+          {weekdays.map(d => (
+            <div key={d}>{d}</div>
+          ))}
+        </div>
+
+        {/* Calendar Grid Cells */}
+        <div style={{ 
+          display: 'grid', 
+          gridTemplateColumns: 'repeat(7, 1fr)', 
+          gap: '8px',
+          minHeight: '400px'
+        }}>
+          {gridCells.map((day, idx) => {
+            if (day === null) {
+              return (
+                <div key={`empty-${idx}`} style={{ 
+                  backgroundColor: 'rgba(0,0,0,0.01)', 
+                  borderRadius: '6px',
+                  border: '1px solid transparent'
+                }}></div>
+              );
+            }
+
+            const dayEvents = getEventsForDay(day);
+            const isToday = new Date().getDate() === day && new Date().getMonth() === currentMonth && new Date().getFullYear() === currentYear;
+
+            return (
+              <div 
+                key={`day-${day}`} 
+                onClick={() => {
+                  const dateString = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                  setDate(dateString);
+                }}
+                style={{ 
+                  backgroundColor: isToday ? 'var(--bg-secondary)' : 'var(--bg-card)', 
+                  borderRadius: '8px',
+                  border: isToday ? '1px solid var(--accent)' : '1px solid var(--border-color)',
+                  padding: '8px',
+                  minHeight: '80px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '4px',
+                  cursor: 'pointer',
+                  position: 'relative',
+                  transition: 'all 0.15s ease'
+                }}
+                onMouseEnter={e => {
+                  e.currentTarget.style.borderColor = 'var(--accent)';
+                  e.currentTarget.style.transform = 'translateY(-1px)';
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.borderColor = isToday ? 'var(--accent)' : 'var(--border-color)';
+                  e.currentTarget.style.transform = 'translateY(0)';
+                }}
+              >
+                {/* Day number */}
+                <span style={{ 
+                  fontSize: '12px', 
+                  fontWeight: isToday ? 700 : 500, 
+                  color: isToday ? 'var(--accent)' : 'var(--text-primary)',
+                  alignSelf: 'flex-start'
+                }}>
+                  {day}
+                </span>
+
+                {/* Event pills inside cells */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', overflowY: 'hidden', flex: 1 }}>
+                  {dayEvents.map(ev => {
+                    const colors = getCategoryColor(ev.category);
+                    return (
+                      <div 
+                        key={ev.id}
+                        onClick={(e) => {
+                          e.stopPropagation(); // Don't trigger day click
+                          handleEdit(ev);
+                        }}
+                        style={{
+                          backgroundColor: colors.bg,
+                          color: colors.text,
+                          fontSize: '9px',
+                          fontWeight: 600,
+                          padding: '2px 4px',
+                          borderRadius: '3px',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap',
+                          overflow: 'hidden',
+                          border: ev.status === 'Completed' ? '1px solid var(--success)' : 'none',
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center'
+                        }}
+                        title={`${ev.title}${ev.description ? '\n' + ev.description : ''}`}
+                      >
+                        <span>{ev.title}</span>
+                        {ev.status === 'Completed' && <span style={{ marginLeft: '2px' }}>✓</span>}
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             );
           })}
-          
-          {sortedEvents.length === 0 && (
-            <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>
-              No hay eventos programados. ¡Comienza agendando tu colección!
-            </div>
-          )}
         </div>
       </div>
     </div>
