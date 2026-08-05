@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import { db, isUsingMock } from '../lib/db';
-import type { Insumo, PackagingComponent, Product, Expense, Revenue, ProductMaterial } from '../types';
+import type { Insumo, PackagingComponent, Product, Expense, Revenue, ProductMaterial, CalendarEvent } from '../types';
 import {
   LayoutDashboard,
   Calculator,
@@ -11,6 +11,7 @@ import {
   Box,
   TrendingDown,
   Coins,
+  Calendar,
   LogOut,
   Trash2,
   Edit,
@@ -34,7 +35,7 @@ import {
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
-  const [currentTab, setCurrentTab] = useState<'overview' | 'cotizador' | 'inventory' | 'insumos' | 'packaging' | 'expenses' | 'revenues'>('overview');
+  const [currentTab, setCurrentTab] = useState<'overview' | 'cotizador' | 'inventory' | 'insumos' | 'packaging' | 'expenses' | 'revenues' | 'calendar'>('overview');
   
   // Data States
   const [insumos, setInsumos] = useState<Insumo[]>([]);
@@ -42,6 +43,7 @@ export default function AdminDashboard() {
   const [products, setProducts] = useState<Product[]>([]);
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [revenues, setRevenues] = useState<Revenue[]>([]);
+  const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Auth check
@@ -62,18 +64,20 @@ export default function AdminDashboard() {
   const loadData = async () => {
     setLoading(true);
     try {
-      const [ins, pack, prod, exp, rev] = await Promise.all([
+      const [ins, pack, prod, exp, rev, evs] = await Promise.all([
         db.insumos.getAll(),
         db.packaging.getAll(),
         db.products.getAll(),
         db.expenses.getAll(),
-        db.revenues.getAll()
+        db.revenues.getAll(),
+        db.events.getAll()
       ]);
       setInsumos(ins);
       setPackaging(pack);
       setProducts(prod);
       setExpenses(exp);
       setRevenues(rev);
+      setEvents(evs);
     } catch (err) {
       console.error("Error loading admin data:", err);
     } finally {
@@ -180,6 +184,15 @@ export default function AdminDashboard() {
             <Coins size={18} />
             Ingresos / Ventas
           </button>
+
+          <button
+            onClick={() => setCurrentTab('calendar')}
+            className={`btn ${currentTab === 'calendar' ? 'btn-primary' : 'btn-secondary'}`}
+            style={{ justifyContent: 'flex-start', border: 'none', width: '100%' }}
+          >
+            <Calendar size={18} />
+            Calendario
+          </button>
         </nav>
 
         <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '20px' }}>
@@ -214,6 +227,7 @@ export default function AdminDashboard() {
               {currentTab === 'packaging' && 'Costo de Empaque (Packaging)'}
               {currentTab === 'expenses' && 'Control de Gastos Operativos'}
               {currentTab === 'revenues' && 'Registro de Ingresos / Ventas'}
+              {currentTab === 'calendar' && 'Calendario de Colecciones y Actividades'}
             </h1>
             <p style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
               {isUsingMock ? 'Modo de demostración: los datos se guardan en el navegador' : 'Conectado a la base de datos de Supabase'}
@@ -289,6 +303,12 @@ export default function AdminDashboard() {
                 <RevenuesTab
                   revenues={revenues}
                   products={products}
+                  onSave={loadData}
+                />
+              )}
+              {currentTab === 'calendar' && (
+                <CalendarTab
+                  events={events}
                   onSave={loadData}
                 />
               )}
@@ -1181,6 +1201,11 @@ function InsumosTab({ insumos, onSave }: InsumosProps) {
   const [store, setStore] = useState('');
   const [editId, setEditId] = useState<string | null>(null);
 
+  // Filter and Sort states
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterUnit, setFilterUnit] = useState('all');
+  const [sortBy, setSortBy] = useState<'name' | 'unit_price_asc' | 'unit_price_desc' | 'price_asc' | 'price_desc' | 'store'>('name');
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) return;
@@ -1227,6 +1252,40 @@ function InsumosTab({ insumos, onSave }: InsumosProps) {
       console.error(err);
     }
   };
+
+  // Filter and sort computation
+  const filteredAndSortedInsumos = insumos
+    .filter(i => {
+      const matchSearch = i.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                          (i.store || '').toLowerCase().includes(searchTerm.toLowerCase());
+      const matchUnit = filterUnit === 'all' || i.unit === filterUnit;
+      return matchSearch && matchUnit;
+    })
+    .sort((a, b) => {
+      if (sortBy === 'name') {
+        return a.name.localeCompare(b.name);
+      }
+      if (sortBy === 'unit_price_asc') {
+        const upA = a.unit_price || (a.price / a.quantity_per_unit);
+        const upB = b.unit_price || (b.price / b.quantity_per_unit);
+        return upA - upB;
+      }
+      if (sortBy === 'unit_price_desc') {
+        const upA = a.unit_price || (a.price / a.quantity_per_unit);
+        const upB = b.unit_price || (b.price / b.quantity_per_unit);
+        return upB - upA;
+      }
+      if (sortBy === 'price_asc') {
+        return a.price - b.price;
+      }
+      if (sortBy === 'price_desc') {
+        return b.price - a.price;
+      }
+      if (sortBy === 'store') {
+        return (a.store || '').localeCompare(b.store || '');
+      }
+      return 0;
+    });
 
   return (
     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.8fr', gap: '32px' }}>
@@ -1295,6 +1354,45 @@ function InsumosTab({ insumos, onSave }: InsumosProps) {
       <div className="card">
         <h3 style={{ fontSize: '18px', color: 'var(--text-primary)', marginBottom: '20px' }}>Lista de Insumos</h3>
         
+        {/* Filters */}
+        <div style={{ display: 'flex', gap: '12px', marginBottom: '20px', flexWrap: 'wrap' }}>
+          <input
+            type="text"
+            className="form-input"
+            style={{ flex: 2, minWidth: '180px' }}
+            placeholder="Buscar por nombre o proveedor..."
+            value={searchTerm}
+            onChange={e => setSearchTerm(e.target.value)}
+          />
+          <select
+            className="form-select"
+            style={{ flex: 1, minWidth: '120px' }}
+            value={filterUnit}
+            onChange={e => setFilterUnit(e.target.value)}
+          >
+            <option value="all">Unidades: Todas</option>
+            <option value="metros">Metros</option>
+            <option value="gramos">Gramos</option>
+            <option value="millar">Millar</option>
+            <option value="unidad">Unidad</option>
+            <option value="paquete">Paquete</option>
+            <option value="caja">Caja</option>
+          </select>
+          <select
+            className="form-select"
+            style={{ flex: 1, minWidth: '150px' }}
+            value={sortBy}
+            onChange={e => setSortBy(e.target.value as any)}
+          >
+            <option value="name">Ordenar: Nombre (A-Z)</option>
+            <option value="unit_price_asc">Costo Unitario (Menor-Mayor)</option>
+            <option value="unit_price_desc">Costo Unitario (Mayor-Menor)</option>
+            <option value="price_asc">Precio Paquete (Menor-Mayor)</option>
+            <option value="price_desc">Precio Paquete (Mayor-Menor)</option>
+            <option value="store">Proveedor (A-Z)</option>
+          </select>
+        </div>
+
         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
           <thead>
             <tr style={{ borderBottom: '1px solid var(--border-color)', color: 'var(--text-secondary)' }}>
@@ -1307,7 +1405,7 @@ function InsumosTab({ insumos, onSave }: InsumosProps) {
             </tr>
           </thead>
           <tbody>
-            {insumos.map(i => (
+            {filteredAndSortedInsumos.map(i => (
               <tr key={i.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
                 <td style={{ padding: '12px 8px', fontWeight: 600, color: 'var(--text-primary)' }}>{i.name}</td>
                 <td style={{ padding: '12px 8px' }}>{i.quantity_per_unit} {i.unit}</td>
@@ -1326,6 +1424,13 @@ function InsumosTab({ insumos, onSave }: InsumosProps) {
                 </td>
               </tr>
             ))}
+            {filteredAndSortedInsumos.length === 0 && (
+              <tr>
+                <td colSpan={6} style={{ textAlign: 'center', padding: '24px', color: 'var(--text-muted)' }}>
+                  No se encontraron insumos.
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>
@@ -1335,8 +1440,214 @@ function InsumosTab({ insumos, onSave }: InsumosProps) {
 }
 
 // ==========================================
-// 5. PACKAGING CONFIG TAB
+// 4.5 CALENDAR EVENTS TAB
 // ==========================================
+interface CalendarProps {
+  events: CalendarEvent[];
+  onSave: () => void;
+}
+
+function CalendarTab({ events, onSave }: CalendarProps) {
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [date, setDate] = useState('');
+  const [category, setCategory] = useState<'Production' | 'Bazar' | 'Fitting' | 'Photo Shoot' | 'Launch' | 'Other'>('Production');
+  const [status, setStatus] = useState<'Pending' | 'Completed'>('Pending');
+  const [editId, setEditId] = useState<string | null>(null);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!title.trim() || !date) return;
+
+    try {
+      const event: CalendarEvent = {
+        id: editId || undefined as any,
+        title,
+        description,
+        date,
+        category,
+        status
+      };
+      await db.events.save(event);
+      
+      // Reset
+      setTitle('');
+      setDescription('');
+      setDate('');
+      setCategory('Production');
+      setStatus('Pending');
+      setEditId(null);
+      onSave();
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleEdit = (ev: CalendarEvent) => {
+    setEditId(ev.id);
+    setTitle(ev.title);
+    setDescription(ev.description || '');
+    setDate(ev.date);
+    setCategory(ev.category);
+    setStatus(ev.status);
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('¿Eliminar evento del calendario?')) return;
+    try {
+      await db.events.delete(id);
+      onSave();
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const getCategoryColor = (cat: string) => {
+    switch (cat) {
+      case 'Production': return { bg: 'rgba(143, 159, 135, 0.15)', text: '#8f9f87', label: 'Producción' };
+      case 'Bazar': return { bg: 'rgba(197, 139, 104, 0.15)', text: '#c58b68', label: 'Bazar' };
+      case 'Fitting': return { bg: 'rgba(154, 125, 86, 0.15)', text: '#9a7d56', label: 'Prueba Tallas' };
+      case 'Photo Shoot': return { bg: 'rgba(197, 168, 128, 0.15)', text: '#c5a880', label: 'Sesión Fotos' };
+      case 'Launch': return { bg: 'rgba(219, 123, 95, 0.15)', text: '#db7b5f', label: 'Lanzamiento' };
+      default: return { bg: 'rgba(158, 155, 146, 0.15)', text: '#9e9b92', label: 'Otro' };
+    }
+  };
+
+  // Group events by date (sorted chronological)
+  const sortedEvents = [...events].sort((a, b) => a.date.localeCompare(b.date));
+
+  return (
+    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.6fr', gap: '32px' }}>
+      {/* Form */}
+      <div className="card">
+        <h3 style={{ fontSize: '18px', color: 'var(--text-primary)', marginBottom: '20px' }}>
+          {editId ? 'Editar Evento' : 'Programar Evento'}
+        </h3>
+        
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <div className="form-group">
+            <label className="form-label">Título del Evento</label>
+            <input type="text" className="form-input" value={title} onChange={e => setTitle(e.target.value)} required placeholder="Ej: Lanzamiento colección verano" />
+          </div>
+
+          <div className="form-group">
+            <label className="form-label">Fecha</label>
+            <input type="date" className="form-input" value={date} onChange={e => setDate(e.target.value)} required />
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+            <div className="form-group">
+              <label className="form-label">Categoría</label>
+              <select className="form-select" value={category} onChange={e => setCategory(e.target.value as any)}>
+                <option value="Launch">Lanzamiento</option>
+                <option value="Photo Shoot">Sesión de Fotos</option>
+                <option value="Bazar">Bazar / Evento</option>
+                <option value="Production">Producción</option>
+                <option value="Fitting">Prueba Tallas</option>
+                <option value="Other">Otro</option>
+              </select>
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">Estado</label>
+              <select className="form-select" value={status} onChange={e => setStatus(e.target.value as any)}>
+                <option value="Pending">Pendiente</option>
+                <option value="Completed">Completado</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="form-group">
+            <label className="form-label">Notas / Descripción</label>
+            <textarea className="form-input" value={description} onChange={e => setDescription(e.target.value)} placeholder="Agrega notas adicionales del evento..." style={{ minHeight: '80px', resize: 'vertical' }} />
+          </div>
+
+          <button type="submit" className="btn btn-primary" style={{ marginTop: '8px' }}>
+            {editId ? 'Guardar Cambios' : 'Agendar Evento'}
+          </button>
+          
+          {editId && (
+            <button type="button" onClick={() => {
+              setEditId(null);
+              setTitle('');
+              setDescription('');
+              setDate('');
+              setCategory('Production');
+              setStatus('Pending');
+            }} className="btn btn-secondary">
+              Cancelar
+            </button>
+          )}
+        </form>
+      </div>
+
+      {/* Agenda list */}
+      <div className="card" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        <h3 style={{ fontSize: '18px', color: 'var(--text-primary)' }}>Calendario de Actividades</h3>
+        
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', maxHeight: '550px', overflowY: 'auto', paddingRight: '4px' }}>
+          {sortedEvents.map(ev => {
+            const colors = getCategoryColor(ev.category);
+            return (
+              <div key={ev.id} className="glass" style={{
+                padding: '16px',
+                borderRadius: '8px',
+                border: `1px solid ${ev.status === 'Completed' ? 'var(--success-glow)' : 'var(--border-color)'}`,
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                gap: '16px'
+              }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                    <span style={{
+                      backgroundColor: colors.bg,
+                      color: colors.text,
+                      fontSize: '11px',
+                      fontWeight: 600,
+                      padding: '2px 8px',
+                      borderRadius: '4px',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.5px'
+                    }}>
+                      {colors.label}
+                    </span>
+                    <span style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 500 }}>
+                      {new Date(ev.date + 'T00:00:00').toLocaleDateString('es-MX', { weekday: 'short', day: 'numeric', month: 'short' })}
+                    </span>
+                    {ev.status === 'Completed' && (
+                      <span style={{ color: 'var(--success)', fontSize: '11px', fontWeight: 600 }}>✓ Completado</span>
+                    )}
+                  </div>
+                  <h4 style={{ fontSize: '15px', color: 'var(--text-primary)', margin: 0, fontWeight: 600 }}>{ev.title}</h4>
+                  {ev.description && (
+                    <p style={{ fontSize: '12px', color: 'var(--text-secondary)', margin: 0 }}>{ev.description}</p>
+                  )}
+                </div>
+
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <button onClick={() => handleEdit(ev)} className="btn btn-secondary" style={{ padding: '6px 10px', fontSize: '12px' }}>
+                    <Edit size={14} />
+                  </button>
+                  <button onClick={() => handleDelete(ev.id)} className="btn btn-danger" style={{ padding: '6px 10px', fontSize: '12px' }}>
+                    <Trash2 size={14} />
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+          
+          {sortedEvents.length === 0 && (
+            <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>
+              No hay eventos programados. ¡Comienza agendando tu colección!
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 interface PackagingProps {
   packaging: PackagingComponent[];
   onSave: () => void;

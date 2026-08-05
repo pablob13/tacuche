@@ -154,3 +154,24 @@ ON public.revenues FOR ALL
 TO authenticated 
 USING (true) 
 WITH CHECK (true);
+
+-- EVENTS TABLE:
+CREATE TABLE IF NOT EXISTS public.events (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  title TEXT NOT NULL,
+  description TEXT,
+  date DATE NOT NULL,
+  category TEXT NOT NULL CHECK (category IN ('Production', 'Bazar', 'Fitting', 'Photo Shoot', 'Launch', 'Other')),
+  status TEXT NOT NULL CHECK (status IN ('Pending', 'Completed')) DEFAULT 'Pending',
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- Enable RLS
+ALTER TABLE public.events ENABLE ROW LEVEL SECURITY;
+
+-- Auth users can do anything on events
+CREATE POLICY "Auth All Events" 
+ON public.events FOR ALL 
+TO authenticated 
+USING (true) 
+WITH CHECK (true);

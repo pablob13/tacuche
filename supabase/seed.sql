@@ -6,6 +6,8 @@ TRUNCATE public.product_insumos CASCADE;
 TRUNCATE public.insumos CASCADE;
 TRUNCATE public.products CASCADE;
 TRUNCATE public.packaging_components CASCADE;
+TRUNCATE public.events CASCADE;
+TRUNCATE public.expenses CASCADE;
 
 -- 2. Insert INSUMOS (Raw Materials)
 INSERT INTO public.insumos (id, name, unit, quantity_per_unit, price, store) VALUES
@@ -115,3 +117,28 @@ INSERT INTO public.product_insumos (product_id, insumo_id, quantity_used) VALUES
 -- Falda Blanca Lino (i24: Encaje 0.8, i25: Telas Lino 0.8)
 ('e3fd1736-0d2f-46d0-8f0d-e6efad416d19', 'c17424fa-a021-4bd1-93bd-a9d98e0f4724', 0.8),
 ('e3fd1736-0d2f-46d0-8f0d-e6efad416d19', 'c17424fa-a021-4bd1-93bd-a9d98e0f4725', 0.8);
+
+-- 6. Insert CALENDAR EVENTS
+INSERT INTO public.events (id, title, description, date, category, status) VALUES
+('f1a18204-586b-4e8c-8c7c-473d09a25b11', 'Sesión de Fotos Otoño', 'Sesión de fotos con las nuevas prendas de lino en exteriores.', (CURRENT_DATE + INTERVAL '3 days')::DATE, 'Photo Shoot', 'Pending'),
+('f1a18204-586b-4e8c-8c7c-473d09a25b12', 'Bazar Roma', 'Venta y exhibición en el bazar de la Roma, llevar stock de hoodies.', (CURRENT_DATE + INTERVAL '10 days')::DATE, 'Bazar', 'Pending'),
+('f1a18204-586b-4e8c-8c7c-473d09a25b13', 'Prueba de Tallas - Cliente Especial', 'Ajuste final del corset negro a medida.', (CURRENT_DATE + INTERVAL '1 day')::DATE, 'Fitting', 'Pending'),
+('f1a18204-586b-4e8c-8c7c-473d09a25b14', 'Lanzamiento de Colección Cápsula', 'Publicar las prendas de mezclilla reciclada en la tienda en línea.', (CURRENT_DATE - INTERVAL '2 days')::DATE, 'Launch', 'Completed');
+
+-- 7. Insert HISTORICAL EXPENSES (Egresos del Excel)
+INSERT INTO public.expenses (id, date, concept, place, amount, paid_by) VALUES
+('b1a18204-586b-4e8c-8c7c-473d09a25a01', '2026-03-19', 'Impresiones', 'Office Depot', 770.00, 'Mitad'),
+('b1a18204-586b-4e8c-8c7c-473d09a25a02', '2026-04-28', 'Venado', 'Centro', 1090.00, 'Tani'),
+('b1a18204-586b-4e8c-8c7c-473d09a25a03', '2026-04-28', 'La imperial', 'Centro', 39.80, 'Maripy'),
+('b1a18204-586b-4e8c-8c7c-473d09a25a04', '2026-04-28', 'Chaquiras', 'Centro', 265.00, 'Tani'),
+('b1a18204-586b-4e8c-8c7c-473d09a25a05', '2026-04-28', 'Nuevo Mundo', 'Centro', 200.00, 'Tani'),
+('b1a18204-586b-4e8c-8c7c-473d09a25a06', '2026-04-28', 'Mercería', 'Centro', 215.00, 'Maripy'),
+('b1a18204-586b-4e8c-8c7c-473d09a25a07', '2026-04-28', 'Copacabana', 'Centro', 93.00, 'Tani'),
+('b1a18204-586b-4e8c-8c7c-473d09a25a08', '2026-04-28', 'Ganon', 'Centro', 1260.00, 'Maripy'),
+('b1a18204-586b-4e8c-8c7c-473d09a25a09', '2026-05-12', 'junco', 'junco', 950.00, 'Tani'),
+('b1a18204-586b-4e8c-8c7c-473d09a25a10', '2026-05-20', 'Anticipo bazar', 'Casa Bazar', 1150.00, 'Tani'),
+('b1a18204-586b-4e8c-8c7c-473d09a25a11', '2026-05-25', 'Registro IMPI', 'IMPI', 2813.77, 'Maripy'),
+('b1a18204-586b-4e8c-8c7c-473d09a25a12', '2026-05-30', 'Liq. Bazar', 'Casa Bazar', 1150.00, 'Tani'),
+('b1a18204-586b-4e8c-8c7c-473d09a25a13', '2026-06-05', 'Cambio bazar', 'Bazar', 1500.00, 'Tani'),
+('b1a18204-586b-4e8c-8c7c-473d09a25a14', '2026-06-06', 'Cambio bazar', 'Bazar', 1500.00, 'Tani'),
+('b1a18204-586b-4e8c-8c7c-473d09a25a15', '2026-06-10', 'Ganchos', 'Costco', 399.00, 'Tani');

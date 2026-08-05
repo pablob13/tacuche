@@ -71,3 +71,13 @@ export interface Revenue {
   notes?: string;
   created_at?: string;
 }
+
+export interface CalendarEvent {
+  id: string;
+  title: string;
+  description?: string;
+  date: string; // YYYY-MM-DD
+  category: 'Production' | 'Bazar' | 'Fitting' | 'Photo Shoot' | 'Launch' | 'Other';
+  status: 'Pending' | 'Completed';
+  created_at?: string;
+}

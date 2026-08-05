@@ -1,6 +1,6 @@
 import { supabase, isSupabaseConfigured } from './supabase';
 import { mockDb } from './mockData';
-import type { Insumo, PackagingComponent, Product, Expense, Revenue } from '../types';
+import type { Insumo, PackagingComponent, Product, Expense, Revenue, CalendarEvent } from '../types';
 
 export const isUsingMock = !isSupabaseConfigured;
 
@@ -207,6 +207,30 @@ export const db = {
     delete: async (id: string): Promise<void> => {
       if (isUsingMock) return mockDb.revenues.delete(id);
       const { error } = await supabase.from('revenues').delete().eq('id', id);
+      if (error) throw error;
+    }
+  },
+
+  events: {
+    getAll: async (): Promise<CalendarEvent[]> => {
+      return execute(
+        async () => await supabase.from('events').select('*').order('date'),
+        () => mockDb.events.getAll()
+      );
+    },
+    save: async (item: CalendarEvent): Promise<CalendarEvent> => {
+      if (isUsingMock) return mockDb.events.save(item);
+      const { data, error } = await supabase
+        .from('events')
+        .upsert(item)
+        .select()
+        .single();
+      if (error) throw error;
+      return data;
+    },
+    delete: async (id: string): Promise<void> => {
+      if (isUsingMock) return mockDb.events.delete(id);
+      const { error } = await supabase.from('events').delete().eq('id', id);
       if (error) throw error;
     }
   }

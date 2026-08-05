@@ -1,4 +1,4 @@
-import type { Insumo, PackagingComponent, Product, Expense, Revenue } from '../types';
+import type { Insumo, PackagingComponent, Product, Expense, Revenue, CalendarEvent } from '../types';
 
 // Default Insumos from Excel
 const defaultInsumos: Insumo[] = [
@@ -426,6 +426,14 @@ const defaultRevenues: Revenue[] = [
   { id: 'r3', date: '2026-06-25', product_id: 'prod3', quantity: 1, total_amount: 3600, profit: 751, payment_method: 'Cash', recorded_by: 'Maripy', notes: 'Venta directa' }
 ];
 
+// Default Calendar Events
+const defaultEvents: CalendarEvent[] = [
+  { id: 'ev1', title: 'Sesión de Fotos Otoño', description: 'Sesión de fotos con las nuevas prendas de lino en exteriores.', date: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], category: 'Photo Shoot', status: 'Pending' },
+  { id: 'ev2', title: 'Bazar Roma', description: 'Venta y exhibición en el bazar de la Roma, llevar stock de hoodies.', date: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], category: 'Bazar', status: 'Pending' },
+  { id: 'ev3', title: 'Prueba de Tallas - Cliente Especial', description: 'Ajuste final del corset negro a medida.', date: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], category: 'Fitting', status: 'Pending' },
+  { id: 'ev4', title: 'Lanzamiento de Colección Cápsula', description: 'Publicar las prendas de mezclilla reciclada en la tienda en línea.', date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], category: 'Launch', status: 'Completed' }
+];
+
 // Helper to initialize localStorage if empty
 const initLocalStorage = () => {
   if (!localStorage.getItem('tacuche_insumos')) {
@@ -442,6 +450,9 @@ const initLocalStorage = () => {
   }
   if (!localStorage.getItem('tacuche_revenues')) {
     localStorage.setItem('tacuche_revenues', JSON.stringify(defaultRevenues));
+  }
+  if (!localStorage.getItem('tacuche_events')) {
+    localStorage.setItem('tacuche_events', JSON.stringify(defaultEvents));
   }
 };
 
@@ -568,6 +579,30 @@ export const mockDb = {
     delete: (id: string) => {
       const items = mockDb.revenues.getAll().filter(i => i.id !== id);
       localStorage.setItem('tacuche_revenues', JSON.stringify(items));
+    }
+  },
+
+  events: {
+    getAll: (): CalendarEvent[] => {
+      initLocalStorage();
+      return JSON.parse(localStorage.getItem('tacuche_events') || '[]');
+    },
+    save: (item: CalendarEvent) => {
+      const items = mockDb.events.getAll();
+      const existingIdx = items.findIndex(i => i.id === item.id);
+      const newItem = { ...item };
+      if (existingIdx > -1) {
+        items[existingIdx] = newItem;
+      } else {
+        newItem.id = newItem.id || Math.random().toString(36).substr(2, 9);
+        items.push(newItem);
+      }
+      localStorage.setItem('tacuche_events', JSON.stringify(items));
+      return newItem;
+    },
+    delete: (id: string) => {
+      const items = mockDb.events.getAll().filter(i => i.id !== id);
+      localStorage.setItem('tacuche_events', JSON.stringify(items));
     }
   }
 };
