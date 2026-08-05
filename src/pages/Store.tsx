@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { db, isUsingMock } from '../lib/db';
-import type { Product } from '../types';
+import type { Product, StoreSettings } from '../types';
 import { ShoppingBag, Trash2, Lock, Plus, Minus, Check, Database } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -11,24 +11,28 @@ interface CartItem {
 
 export default function Store() {
   const [products, setProducts] = useState<Product[]>([]);
+  const [settings, setSettings] = useState<StoreSettings | null>(null);
   const [loading, setLoading] = useState(true);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<'cash' | 'card'>('cash');
 
   useEffect(() => {
-    async function loadProducts() {
+    async function loadStoreData() {
       try {
-        const data = await db.products.getAll();
-        // Only active and in-stock or catalog-ready items
-        setProducts(data.filter(p => p.is_active));
+        const [productsData, settingsData] = await Promise.all([
+          db.products.getAll(),
+          db.settings.get()
+        ]);
+        setProducts(productsData.filter(p => p.is_active));
+        setSettings(settingsData);
       } catch (err) {
         console.error(err);
       } finally {
         setLoading(false);
       }
     }
-    loadProducts();
+    loadStoreData();
   }, []);
 
   const addToCart = (product: Product) => {
@@ -78,7 +82,7 @@ export default function Store() {
   };
 
   const handleCheckout = () => {
-    const phone = '5215555555555'; // Default WhatsApp number, user can configure or we can pull from settings
+    const phone = settings?.whatsapp_number || '525500000000';
     let message = `*¡Hola Tacuche!* 🛍️✨\nMe interesa comprar las siguientes prendas:\n\n`;
     
     cart.forEach(item => {
@@ -187,10 +191,10 @@ export default function Store() {
         borderBottom: '1px solid var(--border-color)'
       }}>
         <h2 style={{ fontSize: '48px', marginBottom: '16px', color: '#fff', fontFamily: 'var(--font-heading)' }}>
-          Colección de Autor
+          {settings?.store_title || 'Colección de Autor'}
         </h2>
         <p style={{ color: 'var(--text-secondary)', maxWidth: '600px', margin: '0 auto', fontSize: '15px' }}>
-          Prendas exclusivas confeccionadas a mano. Cada pieza es única y diseñada con pasión por nuestro estudio. Cotiza tu pedido y finaliza por WhatsApp.
+          {settings?.store_subtitle || 'Prendas exclusivas confeccionadas a mano. Cada pieza es única y diseñada con pasión por nuestro estudio. Cotiza tu pedido y finaliza por WhatsApp.'}
         </p>
       </section>
 

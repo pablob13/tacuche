@@ -175,3 +175,29 @@ ON public.events FOR ALL
 TO authenticated 
 USING (true) 
 WITH CHECK (true);
+
+-- STORE SETTINGS TABLE:
+CREATE TABLE IF NOT EXISTS public.store_settings (
+  id TEXT PRIMARY KEY DEFAULT 'main',
+  whatsapp_number TEXT NOT NULL DEFAULT '525500000000',
+  store_title TEXT NOT NULL DEFAULT 'Colección de Autor',
+  store_subtitle TEXT NOT NULL DEFAULT 'Prendas exclusivas confeccionadas a mano. Cada pieza es única y diseñada con pasión por nuestro estudio. Cotiza tu pedido y finaliza por WhatsApp.',
+  instagram_url TEXT DEFAULT '',
+  hero_banner_url TEXT DEFAULT '',
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- Enable RLS
+ALTER TABLE public.store_settings ENABLE ROW LEVEL SECURITY;
+
+-- Allow public read of settings
+CREATE POLICY "Allow Public Read of Settings" 
+ON public.store_settings FOR SELECT 
+USING (true);
+
+-- Auth users can do anything on settings
+CREATE POLICY "Auth All Settings" 
+ON public.store_settings FOR ALL 
+TO authenticated 
+USING (true) 
+WITH CHECK (true);

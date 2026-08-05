@@ -81,3 +81,13 @@ export interface CalendarEvent {
   status: 'Pending' | 'Completed';
   created_at?: string;
 }
+
+export interface StoreSettings {
+  id: string;
+  whatsapp_number: string;
+  store_title: string;
+  store_subtitle: string;
+  instagram_url?: string;
+  hero_banner_url?: string;
+  created_at?: string;
+}

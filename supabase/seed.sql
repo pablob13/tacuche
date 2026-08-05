@@ -8,6 +8,7 @@ TRUNCATE public.products CASCADE;
 TRUNCATE public.packaging_components CASCADE;
 TRUNCATE public.events CASCADE;
 TRUNCATE public.expenses CASCADE;
+TRUNCATE public.store_settings CASCADE;
 
 -- 2. Insert INSUMOS (Raw Materials)
 INSERT INTO public.insumos (id, name, unit, quantity_per_unit, price, store) VALUES
@@ -142,3 +143,12 @@ INSERT INTO public.expenses (id, date, concept, place, amount, paid_by) VALUES
 ('b1a18204-586b-4e8c-8c7c-473d09a25a13', '2026-06-05', 'Cambio bazar', 'Bazar', 1500.00, 'Tani'),
 ('b1a18204-586b-4e8c-8c7c-473d09a25a14', '2026-06-06', 'Cambio bazar', 'Bazar', 1500.00, 'Tani'),
 ('b1a18204-586b-4e8c-8c7c-473d09a25a15', '2026-06-10', 'Ganchos', 'Costco', 399.00, 'Tani');
+
+-- 8. Insert STORE SETTINGS
+INSERT INTO public.store_settings (id, whatsapp_number, store_title, store_subtitle, instagram_url) VALUES
+('main', '525500000000', 'Colección de Autor', 'Prendas exclusivas confeccionadas a mano. Cada pieza es única y diseñada con pasión por nuestro estudio. Cotiza tu pedido y finaliza por WhatsApp.', 'https://instagram.com/tacuche.estudio')
+ON CONFLICT (id) DO UPDATE SET
+  whatsapp_number = EXCLUDED.whatsapp_number,
+  store_title = EXCLUDED.store_title,
+  store_subtitle = EXCLUDED.store_subtitle,
+  instagram_url = EXCLUDED.instagram_url;

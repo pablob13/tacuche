@@ -1,6 +1,6 @@
 import { supabase, isSupabaseConfigured } from './supabase';
 import { mockDb } from './mockData';
-import type { Insumo, PackagingComponent, Product, Expense, Revenue, CalendarEvent } from '../types';
+import type { Insumo, PackagingComponent, Product, Expense, Revenue, CalendarEvent, StoreSettings } from '../types';
 
 export const isUsingMock = !isSupabaseConfigured;
 
@@ -232,6 +232,34 @@ export const db = {
       if (isUsingMock) return mockDb.events.delete(id);
       const { error } = await supabase.from('events').delete().eq('id', id);
       if (error) throw error;
+    }
+  },
+
+  settings: {
+    get: async (): Promise<StoreSettings> => {
+      if (isUsingMock) return mockDb.settings.get();
+      try {
+        const { data, error } = await supabase
+          .from('store_settings')
+          .select('*')
+          .eq('id', 'main')
+          .maybeSingle();
+        if (error) throw error;
+        return data || mockDb.settings.get();
+      } catch (err) {
+        console.warn("Error getting settings, fallback to local storage:", err);
+        return mockDb.settings.get();
+      }
+    },
+    save: async (item: StoreSettings): Promise<StoreSettings> => {
+      if (isUsingMock) return mockDb.settings.save(item);
+      const { data, error } = await supabase
+        .from('store_settings')
+        .upsert({ ...item, id: 'main' })
+        .select()
+        .single();
+      if (error) throw error;
+      return data;
     }
   }
 };

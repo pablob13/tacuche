@@ -12,6 +12,7 @@ import {
   TrendingDown,
   Coins,
   Calendar,
+  Settings,
   LogOut,
   Trash2,
   Edit,
@@ -35,7 +36,7 @@ import {
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
-  const [currentTab, setCurrentTab] = useState<'overview' | 'cotizador' | 'inventory' | 'insumos' | 'packaging' | 'expenses' | 'revenues' | 'calendar'>('overview');
+  const [currentTab, setCurrentTab] = useState<'overview' | 'cotizador' | 'inventory' | 'insumos' | 'packaging' | 'expenses' | 'revenues' | 'calendar' | 'personalizar'>('overview');
   
   // Data States
   const [insumos, setInsumos] = useState<Insumo[]>([]);
@@ -193,6 +194,15 @@ export default function AdminDashboard() {
             <Calendar size={18} />
             Calendario
           </button>
+
+          <button
+            onClick={() => setCurrentTab('personalizar')}
+            className={`btn ${currentTab === 'personalizar' ? 'btn-primary' : 'btn-secondary'}`}
+            style={{ justifyContent: 'flex-start', border: 'none', width: '100%' }}
+          >
+            <Settings size={18} />
+            Personalizar Tienda
+          </button>
         </nav>
 
         <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '20px' }}>
@@ -228,6 +238,7 @@ export default function AdminDashboard() {
               {currentTab === 'expenses' && 'Control de Gastos Operativos'}
               {currentTab === 'revenues' && 'Registro de Ingresos / Ventas'}
               {currentTab === 'calendar' && 'Calendario de Colecciones y Actividades'}
+              {currentTab === 'personalizar' && 'Personalizar Tienda en Línea'}
             </h1>
             <p style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
               {isUsingMock ? 'Modo de demostración: los datos se guardan en el navegador' : 'Conectado a la base de datos de Supabase'}
@@ -309,6 +320,11 @@ export default function AdminDashboard() {
               {currentTab === 'calendar' && (
                 <CalendarTab
                   events={events}
+                  onSave={loadData}
+                />
+              )}
+              {currentTab === 'personalizar' && (
+                <PersonalizarTab
                   onSave={loadData}
                 />
               )}
@@ -2309,6 +2325,148 @@ function RevenuesTab({ revenues, products, onSave }: RevenuesProps) {
         </table>
       </div>
 
+    </div>
+  );
+}
+
+
+// ==========================================
+// 8. PERSONALIZAR TIENDA (Store Settings) TAB
+// ==========================================
+interface PersonalizarProps {
+  onSave: () => void;
+}
+
+function PersonalizarTab({ onSave }: PersonalizarProps) {
+  const [whatsapp, setWhatsapp] = useState('');
+  const [title, setTitle] = useState('');
+  const [subtitle, setSubtitle] = useState('');
+  const [instagram, setInstagram] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [success, setSuccess] = useState(false);
+
+  useEffect(() => {
+    async function loadSettings() {
+      try {
+        const s = await db.settings.get();
+        setWhatsapp(s.whatsapp_number);
+        setTitle(s.store_title);
+        setSubtitle(s.store_subtitle);
+        setInstagram(s.instagram_url || '');
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadSettings();
+  }, []);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSaving(true);
+    setSuccess(false);
+    try {
+      await db.settings.save({
+        id: 'main',
+        whatsapp_number: whatsapp,
+        store_title: title,
+        store_subtitle: subtitle,
+        instagram_url: instagram
+      });
+      setSuccess(true);
+      onSave();
+      setTimeout(() => setSuccess(false), 3000);
+    } catch (err) {
+      console.error(err);
+      alert('Error al guardar configuraciones');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (loading) {
+    return <div className="text-muted">Cargando configuraciones...</div>;
+  }
+
+  return (
+    <div style={{ maxWidth: '600px' }} className="fade-in">
+      <div className="card">
+        <h3 style={{ fontSize: '18px', color: 'var(--text-primary)', marginBottom: '20px' }}>
+          Personalizar Tienda en Línea
+        </h3>
+
+        {success && (
+          <div style={{
+            backgroundColor: 'var(--success-glow)',
+            border: '1px solid var(--success)',
+            color: 'var(--success)',
+            borderRadius: '8px',
+            padding: '12px',
+            marginBottom: '20px',
+            fontSize: '14px'
+          }}>
+            ✓ ¡Configuraciones guardadas y actualizadas en vivo con éxito!
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          <div className="form-group">
+            <label className="form-label">Número de WhatsApp (Ventas)</label>
+            <input
+              type="text"
+              className="form-input"
+              value={whatsapp}
+              onChange={e => setWhatsapp(e.target.value)}
+              required
+              placeholder="Ej: 525512345678 (incluye código de país, sin espacios)"
+            />
+            <span style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '4px', display: 'block' }}>
+              Este es el número al que llegarán los mensajes de checkout cuando un cliente compre prendas. Usa código internacional sin el signo + (Ej: 521... para México).
+            </span>
+          </div>
+
+          <div className="form-group">
+            <label className="form-label">Título del Catálogo</label>
+            <input
+              type="text"
+              className="form-input"
+              value={title}
+              onChange={e => setTitle(e.target.value)}
+              required
+              placeholder="Ej: Colección de Autor"
+            />
+          </div>
+
+          <div className="form-group">
+            <label className="form-label">Subtítulo / Slogan de la Tienda</label>
+            <textarea
+              className="form-input"
+              value={subtitle}
+              onChange={e => setSubtitle(e.target.value)}
+              required
+              placeholder="Ej: Confección ética artesanal..."
+              style={{ minHeight: '100px', resize: 'vertical' }}
+            />
+          </div>
+
+          <div className="form-group">
+            <label className="form-label">Enlace de Instagram</label>
+            <input
+              type="url"
+              className="form-input"
+              value={instagram}
+              onChange={e => setInstagram(e.target.value)}
+              placeholder="Ej: https://instagram.com/tacuche.estudio"
+            />
+          </div>
+
+          <button type="submit" className="btn btn-primary" style={{ padding: '12px' }} disabled={saving}>
+            {saving ? 'Guardando...' : 'Guardar Cambios'}
+          </button>
+        </form>
+      </div>
     </div>
   );
 }

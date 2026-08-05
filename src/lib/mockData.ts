@@ -1,4 +1,4 @@
-import type { Insumo, PackagingComponent, Product, Expense, Revenue, CalendarEvent } from '../types';
+import type { Insumo, PackagingComponent, Product, Expense, Revenue, CalendarEvent, StoreSettings } from '../types';
 
 // Default Insumos from Excel
 const defaultInsumos: Insumo[] = [
@@ -434,6 +434,16 @@ const defaultEvents: CalendarEvent[] = [
   { id: 'ev4', title: 'Lanzamiento de Colección Cápsula', description: 'Publicar las prendas de mezclilla reciclada en la tienda en línea.', date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], category: 'Launch', status: 'Completed' }
 ];
 
+// Default Store Settings
+const defaultSettings: StoreSettings = {
+  id: 'main',
+  whatsapp_number: '525500000000',
+  store_title: 'Colección de Autor',
+  store_subtitle: 'Prendas exclusivas confeccionadas a mano. Cada pieza es única y diseñada con pasión por nuestro estudio. Cotiza tu pedido y finaliza por WhatsApp.',
+  instagram_url: 'https://instagram.com/tacuche.estudio',
+  hero_banner_url: ''
+};
+
 // Helper to initialize localStorage if empty
 const initLocalStorage = () => {
   if (!localStorage.getItem('tacuche_insumos')) {
@@ -453,6 +463,9 @@ const initLocalStorage = () => {
   }
   if (!localStorage.getItem('tacuche_events')) {
     localStorage.setItem('tacuche_events', JSON.stringify(defaultEvents));
+  }
+  if (!localStorage.getItem('tacuche_settings')) {
+    localStorage.setItem('tacuche_settings', JSON.stringify(defaultSettings));
   }
 };
 
@@ -603,6 +616,17 @@ export const mockDb = {
     delete: (id: string) => {
       const items = mockDb.events.getAll().filter(i => i.id !== id);
       localStorage.setItem('tacuche_events', JSON.stringify(items));
+    }
+  },
+
+  settings: {
+    get: (): StoreSettings => {
+      initLocalStorage();
+      return JSON.parse(localStorage.getItem('tacuche_settings') || '{}');
+    },
+    save: (item: StoreSettings): StoreSettings => {
+      localStorage.setItem('tacuche_settings', JSON.stringify(item));
+      return item;
     }
   }
 };
