@@ -46,6 +46,7 @@ export interface Product {
   is_active: boolean;
   sizes?: string[];
   category?: string;
+  stock_by_size?: Record<string, number>;
   materials?: ProductMaterial[];
   created_at?: string;
 }

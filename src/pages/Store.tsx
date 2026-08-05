@@ -7,11 +7,13 @@ import { Link } from 'react-router-dom';
 interface CartItem {
   product: Product;
   quantity: number;
+  selectedSize: string;
 }
 
 export default function Store() {
   const [products, setProducts] = useState<Product[]>([]);
   const [settings, setSettings] = useState<StoreSettings | null>(null);
+  const [selectedSizes, setSelectedSizes] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
@@ -25,8 +27,23 @@ export default function Store() {
           db.products.getAll(),
           db.settings.get()
         ]);
-        setProducts(productsData.filter(p => p.is_active));
+        const activeProds = productsData.filter(p => p.is_active);
+        setProducts(activeProds);
         setSettings(settingsData);
+        
+        // Set default sizes for lookbook selector
+        const defaults: Record<string, string> = {};
+        activeProds.forEach(p => {
+          const inStockSizes = ['XS', 'S', 'M', 'L', 'XL'].filter(sz => (p.stock_by_size?.[sz] || 0) > 0);
+          if (inStockSizes.length > 0) {
+            defaults[p.id] = inStockSizes[0];
+          } else if (p.sizes && p.sizes.length > 0) {
+            defaults[p.id] = p.sizes[0];
+          } else {
+            defaults[p.id] = 'M';
+          }
+        });
+        setSelectedSizes(defaults);
       } catch (err) {
         console.error(err);
       } finally {
@@ -36,29 +53,31 @@ export default function Store() {
     loadStoreData();
   }, []);
 
-  const addToCart = (product: Product) => {
+  const addToCart = (product: Product, size: string) => {
     setCart(prev => {
-      const existing = prev.find(item => item.product.id === product.id);
+      const existing = prev.find(item => item.product.id === product.id && item.selectedSize === size);
       if (existing) {
-        if (existing.quantity >= product.stock) return prev;
+        const maxStock = product.stock_by_size?.[size] || product.stock || 99;
+        if (existing.quantity >= maxStock) return prev;
         return prev.map(item =>
-          item.product.id === product.id
+          (item.product.id === product.id && item.selectedSize === size)
             ? { ...item, quantity: item.quantity + 1 }
             : item
         );
       }
-      return [...prev, { product, quantity: 1 }];
+      return [...prev, { product, quantity: 1, selectedSize: size }];
     });
     setIsCartOpen(true);
   };
 
-  const updateCartQuantity = (productId: string, delta: number) => {
+  const updateCartQuantity = (productId: string, size: string, delta: number) => {
     setCart(prev =>
       prev
         .map(item => {
-          if (item.product.id === productId) {
+          if (item.product.id === productId && item.selectedSize === size) {
             const newQty = item.quantity + delta;
-            if (newQty > item.product.stock) return item;
+            const maxStock = item.product.stock_by_size?.[size] || item.product.stock || 99;
+            if (newQty > maxStock) return item;
             return { ...item, quantity: newQty };
           }
           return item;
@@ -67,8 +86,8 @@ export default function Store() {
     );
   };
 
-  const removeFromCart = (productId: string) => {
-    setCart(prev => prev.filter(item => item.product.id !== productId));
+  const removeFromCart = (productId: string, size: string) => {
+    setCart(prev => prev.filter(item => !(item.product.id === productId && item.selectedSize === size)));
   };
 
   const getCartTotal = () => {
@@ -86,7 +105,7 @@ export default function Store() {
     
     cart.forEach(item => {
       const price = paymentMethod === 'cash' ? item.product.price_cash : item.product.price_card;
-      message += `• *${item.product.name}* (Cant: ${item.quantity}) - $${price?.toLocaleString('es-MX')} MXN c/u\n`;
+      message += `• *${item.product.name}* (Talla: ${item.selectedSize}, Cant: ${item.quantity}) - $${price?.toLocaleString('es-MX')} MXN c/u\n`;
     });
 
     const total = getCartTotal();
@@ -586,9 +605,51 @@ export default function Store() {
                       {product.description || 'Prenda exclusiva diseñada en nuestro atelier.'}
                     </p>
 
+                    {/* Lookbook Size Selector Grid */}
+                    {hasStock && (
+                      <div style={{ marginBottom: '14px' }}>
+                        <span style={{ fontSize: '10px', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-secondary)', display: 'block', marginBottom: '6px' }}>
+                          Talla Seleccionada: <strong>{selectedSizes[product.id] || 'M'}</strong>
+                        </span>
+                        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                          {['XS', 'S', 'M', 'L', 'XL'].map(sz => {
+                            const sizeStock = product.stock_by_size?.[sz] || 0;
+                            const isAvailable = sizeStock > 0;
+                            const isSelected = selectedSizes[product.id] === sz;
+                            
+                            return (
+                              <button
+                                key={sz}
+                                type="button"
+                                disabled={!isAvailable}
+                                onClick={() => setSelectedSizes(prev => ({ ...prev, [product.id]: sz }))}
+                                style={{
+                                  width: '28px',
+                                  height: '28px',
+                                  fontSize: '11px',
+                                  fontWeight: 600,
+                                  border: isSelected ? '1.5px solid var(--text-primary)' : '1px solid var(--border-color)',
+                                  backgroundColor: isSelected ? 'var(--text-primary)' : 'transparent',
+                                  color: isSelected ? 'var(--bg-primary)' : (isAvailable ? 'var(--text-primary)' : 'var(--text-muted)'),
+                                  cursor: isAvailable ? 'pointer' : 'not-allowed',
+                                  opacity: isAvailable ? 1 : 0.25,
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  transition: 'all 0.15s ease'
+                                }}
+                              >
+                                {sz}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+
                     {/* Add to Bag Button */}
                     <button
-                      onClick={() => addToCart(product)}
+                      onClick={() => addToCart(product, selectedSizes[product.id] || 'M')}
                       disabled={!hasStock}
                       className="btn btn-primary"
                       style={{
@@ -658,16 +719,19 @@ export default function Store() {
                   />
                   <div style={{ flex: 1 }}>
                     <h4 style={{ fontSize: '13px', fontWeight: 500, margin: '0 0 4px 0', textTransform: 'uppercase', color: 'var(--text-primary)' }}>{item.product.name}</h4>
-                    <span style={{ fontSize: '12px', color: 'var(--text-muted)', display: 'block', marginBottom: '8px' }}>
+                    <span style={{ fontSize: '12px', color: 'var(--text-muted)', display: 'block', marginBottom: '4px' }}>
                       ${((paymentMethod === 'cash' ? item.product.price_cash : item.product.price_card) || 0).toLocaleString('es-MX')} c/u
                     </span>
+                    <span style={{ fontSize: '11px', color: 'var(--accent)', fontWeight: 600, display: 'block', marginBottom: '8px' }}>
+                      Talla: {item.selectedSize}
+                    </span>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                      <button onClick={() => updateCartQuantity(item.product.id, -1)} style={{ background: 'none', border: '1px solid var(--border-color)', borderRadius: '50%', width: '22px', height: '22px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>-</button>
+                      <button onClick={() => updateCartQuantity(item.product.id, item.selectedSize, -1)} style={{ background: 'none', border: '1px solid var(--border-color)', borderRadius: '50%', width: '22px', height: '22px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>-</button>
                       <span style={{ fontSize: '13px', fontWeight: 500 }}>{item.quantity}</span>
-                      <button onClick={() => updateCartQuantity(item.product.id, 1)} style={{ background: 'none', border: '1px solid var(--border-color)', borderRadius: '50%', width: '22px', height: '22px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>+</button>
+                      <button onClick={() => updateCartQuantity(item.product.id, item.selectedSize, 1)} style={{ background: 'none', border: '1px solid var(--border-color)', borderRadius: '50%', width: '22px', height: '22px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>+</button>
                     </div>
                   </div>
-                  <button onClick={() => removeFromCart(item.product.id)} style={{ background: 'none', border: 'none', color: 'var(--error)', cursor: 'pointer' }}><Trash2 size={16} /></button>
+                  <button onClick={() => removeFromCart(item.product.id, item.selectedSize)} style={{ background: 'none', border: 'none', color: 'var(--error)', cursor: 'pointer' }}><Trash2 size={16} /></button>
                 </div>
               ))}
 

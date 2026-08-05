@@ -57,6 +57,7 @@ CREATE TABLE public.products (
     is_active BOOLEAN NOT NULL DEFAULT TRUE,
     sizes TEXT[] DEFAULT '{}'::TEXT[],
     category TEXT,
+    stock_by_size JSONB DEFAULT '{}'::JSONB,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 

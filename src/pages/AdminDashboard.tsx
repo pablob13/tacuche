@@ -46,6 +46,7 @@ export default function AdminDashboard() {
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [revenues, setRevenues] = useState<Revenue[]>([]);
   const [events, setEvents] = useState<CalendarEvent[]>([]);
+  const [selectedProductId, setSelectedProductId] = useState<string>('');
   const [loading, setLoading] = useState(true);
 
   // Auth check
@@ -284,6 +285,8 @@ export default function AdminDashboard() {
                   insumos={insumos}
                   packagingCost={getStandardPackagingCost()}
                   products={products}
+                  selectedProductId={selectedProductId}
+                  setSelectedProductId={setSelectedProductId}
                   onSave={loadData}
                 />
               )}
@@ -291,6 +294,10 @@ export default function AdminDashboard() {
                 <InventoryTab
                   products={products}
                   onSave={loadData}
+                  onEdit={(id) => {
+                    setSelectedProductId(id);
+                    setCurrentTab('cotizador');
+                  }}
                 />
               )}
               {currentTab === 'insumos' && (
@@ -578,12 +585,13 @@ interface CotizadorProps {
   insumos: Insumo[];
   packagingCost: number;
   products: Product[];
+  selectedProductId: string;
+  setSelectedProductId: (id: string) => void;
   onSave: () => void;
 }
 
-function CotizadorTab({ insumos, packagingCost, products, onSave }: CotizadorProps) {
+function CotizadorTab({ insumos, packagingCost, products, selectedProductId, setSelectedProductId, onSave }: CotizadorProps) {
   // Input fields
-  const [selectedProductId, setSelectedProductId] = useState<string>('');
   
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
@@ -599,14 +607,7 @@ function CotizadorTab({ insumos, packagingCost, products, onSave }: CotizadorPro
   const [uploadingImage, setUploadingImage] = useState(false);
   const [sizes, setSizes] = useState<string[]>(['S', 'M', 'L']);
   const [category, setCategory] = useState<string>('Corsets');
-
-  const handleSizeToggle = (size: string) => {
-    if (sizes.includes(size)) {
-      setSizes(sizes.filter(s => s !== size));
-    } else {
-      setSizes([...sizes, size]);
-    }
-  };
+  const [stockBySize, setStockBySize] = useState<Record<string, number>>({ XS: 0, S: 0, M: 0, L: 0, XL: 0 });
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -665,15 +666,15 @@ function CotizadorTab({ insumos, packagingCost, products, onSave }: CotizadorPro
   const [insumoQty, setInsumoQty] = useState<number>(1);
 
   // Hydrate fields if loading existing product
-  const handleProductSelect = (id: string) => {
-    setSelectedProductId(id);
-    if (!id) {
+  useEffect(() => {
+    if (!selectedProductId) {
       // Clear form
       setName('');
       setDescription('');
       setDesigner('Tani');
       setBaseCost(70);
       setLaborHours(6);
+      setLaborHourlyRate(150);
       setDesiredMargin(33);
       setPackagingOverride('');
       setStock(5);
@@ -682,10 +683,11 @@ function CotizadorTab({ insumos, packagingCost, products, onSave }: CotizadorPro
       setMaterials([]);
       setSizes(['S', 'M', 'L']);
       setCategory('Corsets');
+      setStockBySize({ XS: 0, S: 0, M: 0, L: 0, XL: 0 });
       return;
     }
 
-    const p = products.find(prod => prod.id === id);
+    const p = products.find(prod => prod.id === selectedProductId);
     if (p) {
       setName(p.name);
       setDescription(p.description || '');
@@ -701,8 +703,9 @@ function CotizadorTab({ insumos, packagingCost, products, onSave }: CotizadorPro
       setMaterials(p.materials || []);
       setSizes(p.sizes || []);
       setCategory(p.category || 'Corsets');
+      setStockBySize(p.stock_by_size || { XS: 0, S: 0, M: 0, L: 0, XL: 0 });
     }
-  };
+  }, [selectedProductId, products]);
 
   // Add material
   const addMaterial = () => {
@@ -790,6 +793,7 @@ function CotizadorTab({ insumos, packagingCost, products, onSave }: CotizadorPro
         is_active: isActive,
         sizes,
         category,
+        stock_by_size: stockBySize,
         materials: materials.map(m => ({
           insumo_id: m.insumo_id,
           quantity_used: m.quantity_used
@@ -799,7 +803,7 @@ function CotizadorTab({ insumos, packagingCost, products, onSave }: CotizadorPro
       await db.products.save(productToSave);
       
       // Reset form
-      handleProductSelect('');
+      setSelectedProductId('');
       onSave(); // Refresh parent lists
       alert('✓ Prenda guardada exitosamente');
     } catch (err) {
@@ -820,7 +824,7 @@ function CotizadorTab({ insumos, packagingCost, products, onSave }: CotizadorPro
             className="form-select"
             style={{ maxWidth: '220px', padding: '6px 12px' }}
             value={selectedProductId}
-            onChange={e => handleProductSelect(e.target.value)}
+            onChange={e => setSelectedProductId(e.target.value)}
           >
             <option value="">-- Crear Nueva Prenda --</option>
             {products.map(p => (
@@ -956,8 +960,8 @@ function CotizadorTab({ insumos, packagingCost, products, onSave }: CotizadorPro
             </div>
 
             <div className="form-group">
-              <label className="form-label">Stock de Inventario</label>
-              <input type="number" className="form-input" value={stock} onChange={e => setStock(Number(e.target.value))} required />
+              <label className="form-label">Total Stock Calculado</label>
+              <input type="number" className="form-input" value={stock} disabled style={{ backgroundColor: 'var(--bg-secondary)', cursor: 'not-allowed' }} />
             </div>
 
             <div className="form-group">
@@ -969,8 +973,8 @@ function CotizadorTab({ insumos, packagingCost, products, onSave }: CotizadorPro
             </div>
           </div>
 
-          {/* Category & Sizes Inputs */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.2fr', gap: '16px' }}>
+          {/* Category & Stock by Size Grid */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.8fr', gap: '16px' }}>
             <div className="form-group">
               <label className="form-label">Categoría de la Prenda</label>
               <select className="form-select" value={category} onChange={e => setCategory(e.target.value)}>
@@ -984,22 +988,29 @@ function CotizadorTab({ insumos, packagingCost, products, onSave }: CotizadorPro
             </div>
 
             <div className="form-group">
-              <label className="form-label">Tallas Disponibles</label>
-              <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginTop: '8px' }}>
-                {['XS', 'S', 'M', 'L', 'XL'].map(size => {
-                  const isChecked = sizes.includes(size);
-                  return (
-                    <label key={size} style={{ display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer', fontSize: '13px' }}>
-                      <input
-                        type="checkbox"
-                        checked={isChecked}
-                        onChange={() => handleSizeToggle(size)}
-                        style={{ width: '16px', height: '16px', accentColor: 'var(--accent)' }}
-                      />
-                      {size}
-                    </label>
-                  );
-                })}
+              <label className="form-label">Inventario y Stock por Talla</label>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '8px', marginTop: '4px' }}>
+                {['XS', 'S', 'M', 'L', 'XL'].map(sz => (
+                  <div key={sz} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px' }}>
+                    <span style={{ fontSize: '10px', fontWeight: 600, color: 'var(--text-secondary)' }}>{sz}</span>
+                    <input
+                      type="number"
+                      min="0"
+                      className="form-input"
+                      style={{ textAlign: 'center', padding: '6px', fontSize: '12px' }}
+                      value={stockBySize[sz] || 0}
+                      onChange={e => {
+                        const val = Math.max(0, Number(e.target.value));
+                        const updated = { ...stockBySize, [sz]: val };
+                        setStockBySize(updated);
+                        const total = Object.values(updated).reduce((a, b) => a + b, 0);
+                        setStock(total);
+                        const activeSizes = Object.keys(updated).filter(k => updated[k] > 0);
+                        setSizes(activeSizes);
+                      }}
+                    />
+                  </div>
+                ))}
               </div>
             </div>
           </div>
@@ -1161,9 +1172,10 @@ function CotizadorTab({ insumos, packagingCost, products, onSave }: CotizadorPro
 interface InventoryProps {
   products: Product[];
   onSave: () => void;
+  onEdit: (id: string) => void;
 }
 
-function InventoryTab({ products, onSave }: InventoryProps) {
+function InventoryTab({ products, onSave, onEdit }: InventoryProps) {
   const handleDelete = async (id: string) => {
     if (!confirm('¿Estás seguro de eliminar este producto del inventario?')) return;
     try {
@@ -1220,20 +1232,27 @@ function InventoryTab({ products, onSave }: InventoryProps) {
                   </td>
                   <td style={{ padding: '12px', fontWeight: 500 }}>{p.category || 'Corsets'}</td>
                   <td style={{ padding: '12px' }}>
-                    <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
-                      {(p.sizes || []).map(sz => (
-                        <span key={sz} style={{ 
-                          fontSize: '10px', 
-                          fontWeight: 600, 
-                          padding: '2px 6px', 
-                          border: '1px solid var(--border-color)', 
-                          borderRadius: '4px', 
-                          backgroundColor: 'var(--bg-secondary)', 
-                          color: 'var(--text-primary)' 
-                        }}>
-                          {sz}
-                        </span>
-                      ))}
+                    <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                      {['XS', 'S', 'M', 'L', 'XL'].map(sz => {
+                        const szStock = p.stock_by_size?.[sz] || 0;
+                        if (szStock === 0) return null;
+                        return (
+                          <span key={sz} style={{ 
+                            fontSize: '11px', 
+                            fontWeight: 600, 
+                            padding: '2px 6px', 
+                            border: '1px solid var(--border-color)', 
+                            borderRadius: '4px', 
+                            backgroundColor: 'var(--bg-secondary)', 
+                            color: 'var(--text-primary)' 
+                          }}>
+                            {sz}: <strong>{szStock}</strong>
+                          </span>
+                        );
+                      })}
+                      {(!p.stock_by_size || Object.values(p.stock_by_size).every(v => v === 0)) && (
+                        <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Sin desglose (Total: {p.stock})</span>
+                      )}
                     </div>
                   </td>
                   <td style={{ padding: '12px' }}>{p.designer}</td>
@@ -1258,7 +1277,10 @@ function InventoryTab({ products, onSave }: InventoryProps) {
                       {p.is_active ? 'Público' : 'Oculto'}
                     </span>
                   </td>
-                  <td style={{ padding: '12px', textAlign: 'right' }}>
+                  <td style={{ padding: '12px', textAlign: 'right', display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+                    <button onClick={() => onEdit(p.id)} className="btn btn-secondary" style={{ padding: '6px 10px', fontSize: '12px' }}>
+                      <Edit size={14} />
+                    </button>
                     <button onClick={() => handleDelete(p.id)} className="btn btn-danger" style={{ padding: '6px 10px', fontSize: '12px' }}>
                       <Trash2 size={14} />
                     </button>
