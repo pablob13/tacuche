@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { db, isUsingMock } from '../lib/db';
 import type { Product, StoreSettings } from '../types';
-import { ShoppingBag, Trash2, Lock, Plus, Minus, Check, Database } from 'lucide-react';
+import { ShoppingBag, Trash2, Lock, Database } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 interface CartItem {
@@ -16,6 +16,7 @@ export default function Store() {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<'cash' | 'card'>('cash');
+  const [filterDesigner, setFilterDesigner] = useState<string>('all');
 
   useEffect(() => {
     async function loadStoreData() {
@@ -39,7 +40,6 @@ export default function Store() {
     setCart(prev => {
       const existing = prev.find(item => item.product.id === product.id);
       if (existing) {
-        // Limit by stock
         if (existing.quantity >= product.stock) return prev;
         return prev.map(item =>
           item.product.id === product.id
@@ -58,7 +58,6 @@ export default function Store() {
         .map(item => {
           if (item.product.id === productId) {
             const newQty = item.quantity + delta;
-            // Check stock limits
             if (newQty > item.product.stock) return item;
             return { ...item, quantity: newQty };
           }
@@ -98,83 +97,185 @@ export default function Store() {
     window.open(`https://wa.me/${phone}?text=${encoded}`, '_blank');
   };
 
+  // Filter products by designer
+  const filteredProducts = filterDesigner === 'all' 
+    ? products 
+    : products.filter(p => p.designer.toLowerCase() === filterDesigner.toLowerCase());
+
   return (
-    <div className="store-container fade-in" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-      
+    <div className="store-container fade-in" style={{ 
+      backgroundColor: 'var(--bg-primary)', 
+      color: 'var(--text-primary)', 
+      fontFamily: "'Outfit', sans-serif",
+      minHeight: '100vh',
+      display: 'flex',
+      flexDirection: 'column'
+    }}>
+      {/* Dynamic Fonts Import */}
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=Outfit:wght@300;400;500;600;700&display=swap');
+        
+        .lookbook-link {
+          font-size: 13px;
+          font-weight: 500;
+          letter-spacing: 1.5px;
+          text-transform: uppercase;
+          color: var(--text-primary);
+          text-decoration: none;
+          position: relative;
+          transition: opacity 0.2s ease;
+        }
+        .lookbook-link:hover {
+          opacity: 0.7;
+        }
+        .lookbook-link::after {
+          content: '';
+          position: absolute;
+          width: 0;
+          height: 1px;
+          bottom: -4px;
+          left: 0;
+          background-color: var(--text-primary);
+          transition: width 0.2s ease;
+        }
+        .lookbook-link:hover::after {
+          width: 100%;
+        }
+        .category-card {
+          position: relative;
+          overflow: hidden;
+          aspect-ratio: 3/4;
+          cursor: pointer;
+          border-radius: 4px;
+        }
+        .category-card img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          transition: transform 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+        .category-card:hover img {
+          transform: scale(1.04);
+        }
+        .product-card {
+          display: flex;
+          flex-direction: column;
+          border: none;
+          background: transparent;
+          transition: transform 0.3s ease;
+        }
+        .product-card:hover {
+          transform: translateY(-2px);
+        }
+        .product-img-container {
+          position: relative;
+          width: 100%;
+          aspect-ratio: 3/4;
+          background-color: var(--bg-secondary);
+          overflow: hidden;
+          border-radius: 4px;
+        }
+        .product-img-container img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+        .product-card:hover .product-img-container img {
+          transform: scale(1.03);
+        }
+      `}</style>
+
       {/* Demo Warning Banner */}
       {isUsingMock && (
         <div style={{
           backgroundColor: 'var(--accent-glow)',
           borderBottom: '1px solid var(--accent)',
           padding: '8px 16px',
-          fontSize: '13px',
+          fontSize: '12px',
           textAlign: 'center',
           color: 'var(--accent)',
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
-          gap: '8px'
+          gap: '8px',
+          zIndex: 100
         }}>
-          <Database size={14} />
-          <span>Ejecutando en Modo de Demostración (Almacenamiento Local). Los datos se guardan en este navegador.</span>
+          <Database size={13} />
+          <span>Modo Demo (Almacenamiento Local). Los datos se guardan en el navegador.</span>
         </div>
       )}
 
-      {/* Navigation */}
-      <header className="glass" style={{
+      {/* Minimalist Premium Header (Alo Yoga style) */}
+      <header style={{
         position: 'sticky',
         top: 0,
         zIndex: 50,
+        backgroundColor: 'rgba(253, 252, 251, 0.95)',
+        backdropFilter: 'blur(12px)',
         borderBottom: '1px solid var(--border-color)',
-        padding: '16px 24px',
+        padding: '0 32px',
+        height: '80px',
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center'
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <img src="/logo-black.png" alt="TACUCHE" style={{ height: '48px', objectFit: 'contain' }} />
-          <span style={{
-            fontSize: '11px',
-            letterSpacing: '1px',
-            color: 'var(--text-muted)',
-            textTransform: 'uppercase',
-            border: '1px solid var(--border-color)',
-            padding: '2px 8px',
-            borderRadius: '4px'
-          }}>
-            Estudio de Ropa
-          </span>
+        {/* Brand Logo */}
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          <img src="/logo-black.png" alt="TACUCHE" style={{ height: '42px', objectFit: 'contain' }} />
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-          <Link to="/admin" className="btn btn-secondary" style={{ padding: '8px 14px', fontSize: '13px' }}>
-            <Lock size={14} style={{ marginRight: '6px' }} />
-            Administrador
-          </Link>
+        {/* Center navigation */}
+        <nav style={{ display: 'flex', gap: '32px', alignItems: 'center' }}>
+          <a href="#lookbook-banner" className="lookbook-link">Estudio</a>
+          <a href="#popular-categories" className="lookbook-link">Populares</a>
+          <a href="#product-catalog" className="lookbook-link">Colección</a>
+          {settings?.instagram_url && (
+            <a href={settings.instagram_url} target="_blank" rel="noreferrer" className="lookbook-link" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '4px' }}>
+                <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+                <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+                <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+              </svg>
+              Instagram
+            </a>
+          )}
+        </nav>
 
-          <button
+        {/* Action icons */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+          <Link to="/admin" style={{ color: 'var(--text-primary)', display: 'flex', alignItems: 'center' }} title="Administración">
+            <Lock size={18} />
+          </Link>
+          
+          <button 
             onClick={() => setIsCartOpen(true)}
-            className="btn btn-primary"
-            style={{ padding: '8px 16px', position: 'relative' }}
+            style={{ 
+              background: 'none', 
+              border: 'none', 
+              color: 'var(--text-primary)', 
+              cursor: 'pointer',
+              position: 'relative',
+              display: 'flex',
+              alignItems: 'center'
+            }}
           >
-            <ShoppingBag size={16} />
-            <span style={{ marginLeft: '4px', fontWeight: 600 }}>Carrito</span>
+            <ShoppingBag size={20} />
             {cart.length > 0 && (
               <span style={{
                 position: 'absolute',
-                top: '-6px',
-                right: '-6px',
-                backgroundColor: '#ef4444',
-                color: '#fff',
+                top: '-8px',
+                right: '-8px',
+                backgroundColor: 'var(--text-primary)',
+                color: 'var(--bg-primary)',
                 borderRadius: '50%',
-                width: '20px',
-                height: '20px',
-                fontSize: '11px',
+                width: '18px',
+                height: '18px',
+                fontSize: '10px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                fontWeight: 'bold',
-                boxShadow: '0 2px 5px rgba(0,0,0,0.2)'
+                fontWeight: 700
               }}>
                 {cart.reduce((s, i) => s + i.quantity, 0)}
               </span>
@@ -183,156 +284,328 @@ export default function Store() {
         </div>
       </header>
 
-      {/* Hero Header */}
-      <section style={{
-        padding: '64px 24px',
-        textAlign: 'center',
-        background: 'radial-gradient(circle at 50% 50%, rgba(214, 175, 55, 0.08) 0%, transparent 60%)',
-        borderBottom: '1px solid var(--border-color)'
+      {/* Mega Hero Banner Lookbook */}
+      <section id="lookbook-banner" style={{
+        position: 'relative',
+        height: '75vh',
+        width: '100%',
+        backgroundColor: '#111',
+        overflow: 'hidden'
       }}>
-        <h2 style={{ fontSize: '48px', marginBottom: '16px', color: '#fff', fontFamily: 'var(--font-heading)' }}>
-          {settings?.store_title || 'Colección de Autor'}
-        </h2>
-        <p style={{ color: 'var(--text-secondary)', maxWidth: '600px', margin: '0 auto', fontSize: '15px' }}>
-          {settings?.store_subtitle || 'Prendas exclusivas confeccionadas a mano. Cada pieza es única y diseñada con pasión por nuestro estudio. Cotiza tu pedido y finaliza por WhatsApp.'}
-        </p>
+        {/* Background looking model photo */}
+        <img 
+          src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=1200&auto=format&fit=crop" 
+          alt="Tacuche Lookbook" 
+          style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.65, objectPosition: 'center 30%' }}
+        />
+        
+        {/* Overlay Dark/Beige Gradient */}
+        <div style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'linear-gradient(to bottom, rgba(9, 10, 15, 0.1) 0%, rgba(9, 10, 15, 0.7) 100%)',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'flex-end',
+          padding: '64px 48px'
+        }}>
+          <div style={{ maxWidth: '700px' }}>
+            <span style={{ 
+              fontFamily: "'Outfit', sans-serif", 
+              textTransform: 'uppercase', 
+              letterSpacing: '3px', 
+              fontSize: '12px', 
+              color: '#d6af37', 
+              fontWeight: 600,
+              display: 'block',
+              marginBottom: '16px'
+            }}>
+              Atelier Co-Diseñado
+            </span>
+            <h1 style={{ 
+              fontFamily: "'Cormorant Garamond', serif", 
+              fontSize: 'clamp(36px, 6vw, 64px)', 
+              color: '#fff', 
+              margin: '0 0 16px 0', 
+              fontWeight: 300,
+              lineHeight: 1.1
+            }}>
+              {settings?.store_title || 'Colección de Autor'}
+            </h1>
+            <p style={{ 
+              color: '#eae9e5', 
+              fontSize: '15px', 
+              fontWeight: 300, 
+              lineHeight: 1.6, 
+              marginBottom: '28px',
+              fontFamily: "'Outfit', sans-serif"
+            }}>
+              {settings?.store_subtitle || 'Prendas exclusivas confeccionadas a mano. Cada pieza es única y diseñada con pasión por nuestro estudio. Cotiza tu pedido y finaliza por WhatsApp.'}
+            </p>
+            <a 
+              href="#product-catalog" 
+              className="btn" 
+              style={{ 
+                display: 'inline-block',
+                backgroundColor: '#fff', 
+                color: '#111', 
+                fontWeight: 600, 
+                padding: '14px 28px', 
+                borderRadius: '0', 
+                textTransform: 'uppercase', 
+                letterSpacing: '2px', 
+                fontSize: '11px',
+                textDecoration: 'none'
+              }}
+            >
+              Comprar la Colección
+            </a>
+          </div>
+        </div>
       </section>
 
-      {/* Main Catalog */}
-      <main className="container" style={{ padding: '48px 24px', flex: 1 }}>
+      {/* Featured Categories (LO MÁS POPULAR) */}
+      <section id="popular-categories" style={{ padding: '64px 32px 32px 32px' }}>
+        <h2 style={{
+          textAlign: 'center',
+          fontFamily: "'Outfit', sans-serif",
+          fontSize: '18px',
+          letterSpacing: '3px',
+          fontWeight: 600,
+          textTransform: 'uppercase',
+          marginBottom: '32px',
+          color: 'var(--text-primary)'
+        }}>
+          Lo Más Popular
+        </h2>
+
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+          gap: '24px'
+        }}>
+          {/* Category Corsets */}
+          <div className="category-card" onClick={() => setFilterDesigner('all')}>
+            <img src="https://images.unsplash.com/photo-1618220179428-22790b461013?q=80&w=600&auto=format&fit=crop" alt="Corsets" />
+            <div style={{ position: 'absolute', bottom: '16px', left: '16px', color: '#fff' }}>
+              <span style={{ fontSize: '12px', fontWeight: 600, letterSpacing: '2px', textTransform: 'uppercase' }}>Corsets</span>
+            </div>
+          </div>
+
+          {/* Category Suéteres */}
+          <div className="category-card" onClick={() => setFilterDesigner('all')}>
+            <img src="https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?q=80&w=600&auto=format&fit=crop" alt="Suéteres" />
+            <div style={{ position: 'absolute', bottom: '16px', left: '16px', color: '#fff' }}>
+              <span style={{ fontSize: '12px', fontWeight: 600, letterSpacing: '2px', textTransform: 'uppercase' }}>Suéteres</span>
+            </div>
+          </div>
+
+          {/* Category Pantalones */}
+          <div className="category-card" onClick={() => setFilterDesigner('all')}>
+            <img src="https://images.unsplash.com/photo-1541099649105-f69ad21f3246?q=80&w=600&auto=format&fit=crop" alt="Pantalones" />
+            <div style={{ position: 'absolute', bottom: '16px', left: '16px', color: '#fff' }}>
+              <span style={{ fontSize: '12px', fontWeight: 600, letterSpacing: '2px', textTransform: 'uppercase' }}>Pantalones</span>
+            </div>
+          </div>
+
+          {/* Category Faldas */}
+          <div className="category-card" onClick={() => setFilterDesigner('all')}>
+            <img src="https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?q=80&w=600&auto=format&fit=crop" alt="Faldas" />
+            <div style={{ position: 'absolute', bottom: '16px', left: '16px', color: '#fff' }}>
+              <span style={{ fontSize: '12px', fontWeight: 600, letterSpacing: '2px', textTransform: 'uppercase' }}>Faldas</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Main Catalog Section */}
+      <section id="product-catalog" style={{ padding: '48px 32px 64px 32px', flex: 1 }}>
+        
+        {/* Designer filter & Header */}
+        <div style={{ 
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: 'center', 
+          borderBottom: '1px solid var(--border-color)', 
+          paddingBottom: '16px',
+          marginBottom: '32px'
+        }}>
+          <h3 style={{ 
+            fontFamily: "'Cormorant Garamond', serif", 
+            fontSize: '28px', 
+            fontWeight: 400 
+          }}>
+            Catálogo de Prendas
+          </h3>
+
+          {/* Filters buttons */}
+          <div style={{ display: 'flex', gap: '12px' }}>
+            <button 
+              onClick={() => setFilterDesigner('all')} 
+              className={`btn ${filterDesigner === 'all' ? 'btn-primary' : 'btn-secondary'}`}
+              style={{ padding: '6px 14px', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '1px', borderRadius: '0' }}
+            >
+              Todos
+            </button>
+            <button 
+              onClick={() => setFilterDesigner('Tani')} 
+              className={`btn ${filterDesigner === 'Tani' ? 'btn-primary' : 'btn-secondary'}`}
+              style={{ padding: '6px 14px', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '1px', borderRadius: '0' }}
+            >
+              Diseños Tani
+            </button>
+            <button 
+              onClick={() => setFilterDesigner('Maripy')} 
+              className={`btn ${filterDesigner === 'Maripy' ? 'btn-primary' : 'btn-secondary'}`}
+              style={{ padding: '6px 14px', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '1px', borderRadius: '0' }}
+            >
+              Diseños Maripy
+            </button>
+          </div>
+        </div>
+
+        {/* Loading Spinner */}
         {loading ? (
           <div className="flex-center" style={{ minHeight: '300px', flexDirection: 'column', gap: '16px' }}>
             <div className="spinner" style={{
-              width: '40px',
-              height: '40px',
-              border: '3px solid var(--border-color)',
+              width: '32px',
+              height: '32px',
+              border: '2px solid var(--border-color)',
               borderTopColor: 'var(--accent)',
               borderRadius: '50%',
               animation: 'spin 1s linear infinite'
             }}></div>
-            <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
-            <p className="text-muted">Cargando catálogo...</p>
+            <p className="text-muted" style={{ fontSize: '12px', letterSpacing: '1px' }}>CARGANDO...</p>
           </div>
-        ) : products.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '64px 24px', border: '1px dashed var(--border-color)', borderRadius: '16px' }}>
-            <ShoppingBag size={48} style={{ color: 'var(--text-muted)', marginBottom: '16px' }} />
-            <h3 style={{ color: '#fff', marginBottom: '8px' }}>Catálogo vacío</h3>
-            <p className="text-muted">No hay prendas disponibles en este momento. Vuelve pronto.</p>
+        ) : filteredProducts.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '64px 24px', border: '1px dashed var(--border-color)', borderRadius: '4px' }}>
+            <ShoppingBag size={32} style={{ color: 'var(--text-muted)', marginBottom: '16px' }} />
+            <h3 style={{ marginBottom: '8px', fontWeight: 500 }}>No hay productos disponibles</h3>
+            <p className="text-muted" style={{ fontSize: '13px' }}>Vuelve a consultar el catálogo de Tacuche más tarde.</p>
           </div>
         ) : (
+          /* Products Grid */
           <div style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))',
             gap: '32px'
           }}>
-            {products.map(product => {
+            {filteredProducts.map(product => {
               const hasStock = product.stock > 0;
-              return (
-                <div key={product.id} className="card" style={{
-                  padding: 0,
-                  overflow: 'hidden',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  height: '100%',
-                  background: 'var(--bg-card)',
-                  borderColor: 'var(--border-color)'
-                }}>
-                  {/* Image container */}
-                  <div style={{ width: '100%', height: '320px', backgroundColor: '#111', position: 'relative', overflow: 'hidden' }}>
-                    {product.images && product.images[0] ? (
-                      <img
-                        src={product.images[0]}
-                        alt={product.name}
-                        style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.5s ease' }}
-                        onMouseOver={e => e.currentTarget.style.transform = 'scale(1.05)'}
-                        onMouseOut={e => e.currentTarget.style.transform = 'scale(1)'}
-                      />
-                    ) : (
-                      <div className="flex-center" style={{ width: '100%', height: '100%', color: 'var(--text-muted)' }}>
-                        <ShoppingBag size={40} />
-                      </div>
-                    )}
-                    
-                    {/* Badge Stock */}
-                    <span style={{
-                      position: 'absolute',
-                      top: '12px',
-                      right: '12px',
-                      padding: '4px 10px',
-                      borderRadius: '4px',
-                      fontSize: '11px',
-                      fontWeight: 600,
-                      backgroundColor: hasStock ? 'rgba(16, 185, 129, 0.9)' : 'rgba(239, 68, 68, 0.9)',
-                      color: '#fff'
-                    }}>
-                      {hasStock ? `${product.stock} disponibles` : 'Agotado'}
-                    </span>
+              const mainImage = product.images && product.images[0] 
+                ? product.images[0] 
+                : 'https://images.unsplash.com/photo-1595777457583-95e059d581b8?q=80&w=600&auto=format&fit=crop';
 
+              return (
+                <div key={product.id} className="product-card">
+                  {/* Image container */}
+                  <div className="product-img-container">
+                    <img src={mainImage} alt={product.name} />
+                    
                     {/* Designer Badge */}
                     <span style={{
                       position: 'absolute',
                       bottom: '12px',
                       left: '12px',
-                      padding: '4px 10px',
-                      borderRadius: '4px',
-                      fontSize: '11px',
-                      fontWeight: 500,
-                      backgroundColor: 'rgba(9, 10, 15, 0.85)',
+                      padding: '3px 8px',
+                      fontSize: '10px',
+                      fontWeight: 600,
+                      backgroundColor: 'rgba(253, 252, 251, 0.95)',
                       border: '1px solid var(--border-color)',
-                      color: 'var(--accent)'
+                      color: 'var(--text-primary)',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.5px'
                     }}>
-                      Diseño: {product.designer}
+                      Atelier: {product.designer}
                     </span>
+
+                    {/* Stock status overlay */}
+                    {!hasStock && (
+                      <div style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        backgroundColor: 'rgba(253, 252, 251, 0.7)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                      }}>
+                        <span style={{ 
+                          fontSize: '11px', 
+                          fontWeight: 600, 
+                          letterSpacing: '2px', 
+                          textTransform: 'uppercase',
+                          color: '#ef4444',
+                          border: '1px solid #ef4444',
+                          padding: '6px 12px'
+                        }}>
+                          Agotado
+                        </span>
+                      </div>
+                    )}
                   </div>
 
                   {/* Body Content */}
-                  <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', flex: 1 }}>
-                    <h3 style={{ fontSize: '18px', color: '#fff', marginBottom: '8px', fontWeight: 500 }}>
-                      {product.name}
-                    </h3>
+                  <div style={{ padding: '16px 0', display: 'flex', flexDirection: 'column', flex: 1 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
+                      <h4 style={{ 
+                        fontSize: '14px', 
+                        fontWeight: 500, 
+                        letterSpacing: '0.5px',
+                        textTransform: 'uppercase',
+                        margin: 0,
+                        color: 'var(--text-primary)'
+                      }}>
+                        {product.name}
+                      </h4>
+                      <span style={{ 
+                        fontSize: '14px', 
+                        fontWeight: 600, 
+                        color: 'var(--text-primary)' 
+                      }}>
+                        ${(product.price_cash || 0).toLocaleString('es-MX')} MXN
+                      </span>
+                    </div>
+
                     <p style={{
-                      fontSize: '13px',
+                      fontSize: '12px',
                       color: 'var(--text-secondary)',
-                      marginBottom: '16px',
+                      lineHeight: '1.5',
+                      margin: '0 0 16px 0',
                       flex: 1,
                       display: '-webkit-box',
                       WebkitLineClamp: 2,
                       WebkitBoxOrient: 'vertical',
                       overflow: 'hidden'
                     }}>
-                      {product.description || 'Prenda exclusiva del atelier Tacuche.'}
+                      {product.description || 'Prenda exclusiva diseñada en nuestro atelier.'}
                     </p>
 
-                    {/* Pricing */}
-                    <div style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'flex-end',
-                      borderTop: '1px solid var(--border-color)',
-                      paddingTop: '16px',
-                      marginBottom: '16px'
-                    }}>
-                      <div>
-                        <span style={{ fontSize: '11px', color: 'var(--text-muted)', display: 'block' }}>Efectivo / Cash</span>
-                        <strong style={{ fontSize: '20px', color: 'var(--accent)', fontWeight: 600 }}>
-                          ${product.price_cash?.toLocaleString('es-MX')}
-                        </strong>
-                      </div>
-                      <div style={{ textAlign: 'right' }}>
-                        <span style={{ fontSize: '11px', color: 'var(--text-muted)', display: 'block' }}>Tarjeta / Transf</span>
-                        <span style={{ fontSize: '15px', color: 'var(--text-secondary)', fontWeight: 500 }}>
-                          ${product.price_card?.toLocaleString('es-MX')}
-                        </span>
-                      </div>
-                    </div>
-
+                    {/* Add to Bag Button */}
                     <button
                       onClick={() => addToCart(product)}
                       disabled={!hasStock}
                       className="btn btn-primary"
-                      style={{ width: '100%', padding: '10px' }}
+                      style={{
+                        borderRadius: '0',
+                        fontSize: '11px',
+                        fontWeight: 600,
+                        textTransform: 'uppercase',
+                        letterSpacing: '1.5px',
+                        padding: '10px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '8px'
+                      }}
                     >
-                      {hasStock ? 'Agregar al carrito' : 'No disponible'}
+                      <ShoppingBag size={13} />
+                      Añadir a Bolsa
                     </button>
                   </div>
                 </div>
@@ -340,9 +613,9 @@ export default function Store() {
             })}
           </div>
         )}
-      </main>
+      </section>
 
-      {/* Cart Sidebar Drawer */}
+      {/* Slide-out Shopping Cart */}
       {isCartOpen && (
         <div style={{
           position: 'fixed',
@@ -350,239 +623,150 @@ export default function Store() {
           left: 0,
           right: 0,
           bottom: 0,
-          backgroundColor: 'rgba(0, 0, 0, 0.7)',
+          backgroundColor: 'rgba(0,0,0,0.3)',
           backdropFilter: 'blur(4px)',
           zIndex: 100,
           display: 'flex',
           justifyContent: 'flex-end'
         }} onClick={() => setIsCartOpen(false)}>
+          
           <div style={{
             width: '100%',
-            maxWidth: '450px',
+            maxWidth: '420px',
+            backgroundColor: 'var(--bg-primary)',
             height: '100%',
-            backgroundColor: 'var(--bg-secondary)',
-            borderLeft: '1px solid var(--border-color)',
-            padding: '28px',
+            boxShadow: '-4px 0 30px rgba(0,0,0,0.15)',
             display: 'flex',
             flexDirection: 'column',
-            boxShadow: 'var(--shadow-lg)'
+            padding: '32px'
           }} onClick={e => e.stopPropagation()}>
-            {/* Header */}
-            <div style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              marginBottom: '24px',
-              borderBottom: '1px solid var(--border-color)',
-              paddingBottom: '16px'
-            }}>
-              <h3 style={{ fontSize: '22px', color: '#fff', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <ShoppingBag size={20} className="text-accent" />
-                Mi Carrito
-              </h3>
-              <button
-                onClick={() => setIsCartOpen(false)}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  color: 'var(--text-secondary)',
-                  cursor: 'pointer',
-                  fontSize: '20px'
-                }}
-              >
-                &times;
-              </button>
+            
+            {/* Cart Header */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-color)', paddingBottom: '16px', marginBottom: '24px' }}>
+              <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '24px', margin: 0, fontWeight: 400 }}>Bolsa de Compras</h3>
+              <button onClick={() => setIsCartOpen(false)} style={{ background: 'none', border: 'none', fontSize: '18px', cursor: 'pointer', color: 'var(--text-secondary)' }}>&times;</button>
             </div>
 
-            {/* List */}
-            <div style={{ flex: 1, overflowY: 'auto', marginBottom: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              {cart.length === 0 ? (
-                <div className="flex-center" style={{ height: '80%', flexDirection: 'column', color: 'var(--text-muted)' }}>
-                  <ShoppingBag size={48} style={{ marginBottom: '16px' }} />
-                  <p>Tu carrito está vacío</p>
-                </div>
-              ) : (
-                cart.map(item => {
-                  const itemPrice = paymentMethod === 'cash'
-                    ? (item.product.price_cash || 0)
-                    : (item.product.price_card || 0);
-                  return (
-                    <div key={item.product.id} style={{
-                      display: 'flex',
-                      gap: '16px',
-                      backgroundColor: 'var(--bg-card)',
-                      border: '1px solid var(--border-color)',
-                      borderRadius: '8px',
-                      padding: '12px'
-                    }}>
-                      <img
-                        src={item.product.images[0]}
-                        alt={item.product.name}
-                        style={{ width: '70px', height: '70px', objectFit: 'cover', borderRadius: '4px' }}
-                      />
-                      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-                        <div>
-                          <h4 style={{ fontSize: '14px', color: '#fff', margin: 0 }}>{item.product.name}</h4>
-                          <span style={{ fontSize: '12px', color: 'var(--accent)' }}>
-                            ${itemPrice.toLocaleString('es-MX')} MXN
-                          </span>
-                        </div>
-                        
-                        {/* Qty controls */}
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                          <button
-                            onClick={() => updateCartQuantity(item.product.id, -1)}
-                            style={{
-                              background: 'var(--bg-secondary)',
-                              border: '1px solid var(--border-color)',
-                              color: 'var(--text-primary)',
-                              cursor: 'pointer',
-                              width: '24px',
-                              height: '24px',
-                              borderRadius: '4px',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center'
-                            }}
-                          >
-                            <Minus size={10} />
-                          </button>
-                          <span style={{ fontSize: '13px', fontWeight: 600 }}>{item.quantity}</span>
-                          <button
-                            onClick={() => updateCartQuantity(item.product.id, 1)}
-                            style={{
-                              background: 'var(--bg-secondary)',
-                              border: '1px solid var(--border-color)',
-                              color: 'var(--text-primary)',
-                              cursor: 'pointer',
-                              width: '24px',
-                              height: '24px',
-                              borderRadius: '4px',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center'
-                            }}
-                          >
-                            <Plus size={10} />
-                          </button>
-                        </div>
-                      </div>
-                      <button
-                        onClick={() => removeFromCart(item.product.id)}
-                        style={{
-                          background: 'none',
-                          border: 'none',
-                          color: 'var(--error)',
-                          cursor: 'pointer',
-                          alignSelf: 'center',
-                          padding: '8px'
-                        }}
-                      >
-                        <Trash2 size={16} />
-                      </button>
+            {/* Cart Items List */}
+            <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '20px', paddingRight: '4px' }}>
+              {cart.map(item => (
+                <div key={item.product.id} style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+                  <img 
+                    src={item.product.images && item.product.images[0] ? item.product.images[0] : 'https://images.unsplash.com/photo-1595777457583-95e059d581b8?q=80&w=600&auto=format&fit=crop'} 
+                    alt={item.product.name} 
+                    style={{ width: '64px', height: '80px', objectFit: 'cover', borderRadius: '2px' }}
+                  />
+                  <div style={{ flex: 1 }}>
+                    <h4 style={{ fontSize: '13px', fontWeight: 500, margin: '0 0 4px 0', textTransform: 'uppercase', color: 'var(--text-primary)' }}>{item.product.name}</h4>
+                    <span style={{ fontSize: '12px', color: 'var(--text-muted)', display: 'block', marginBottom: '8px' }}>
+                      ${((paymentMethod === 'cash' ? item.product.price_cash : item.product.price_card) || 0).toLocaleString('es-MX')} c/u
+                    </span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <button onClick={() => updateCartQuantity(item.product.id, -1)} style={{ background: 'none', border: '1px solid var(--border-color)', borderRadius: '50%', width: '22px', height: '22px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>-</button>
+                      <span style={{ fontSize: '13px', fontWeight: 500 }}>{item.quantity}</span>
+                      <button onClick={() => updateCartQuantity(item.product.id, 1)} style={{ background: 'none', border: '1px solid var(--border-color)', borderRadius: '50%', width: '22px', height: '22px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>+</button>
                     </div>
-                  );
-                })
+                  </div>
+                  <button onClick={() => removeFromCart(item.product.id)} style={{ background: 'none', border: 'none', color: 'var(--error)', cursor: 'pointer' }}><Trash2 size={16} /></button>
+                </div>
+              ))}
+
+              {cart.length === 0 && (
+                <div style={{ textAlign: 'center', padding: '40px 0', color: 'var(--text-muted)' }}>
+                  Tu bolsa está vacía.
+                </div>
               )}
             </div>
 
-            {/* Bottom Actions */}
+            {/* Cart Footer */}
             {cart.length > 0 && (
-              <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '20px' }}>
-                {/* Payment Selector */}
-                <div style={{ marginBottom: '16px' }}>
-                  <span style={{ fontSize: '12px', color: 'var(--text-muted)', display: 'block', marginBottom: '8px' }}>
-                    Método de Pago
-                  </span>
-                  <div style={{
-                    display: 'grid',
-                    gridTemplateColumns: '1fr 1fr',
-                    gap: '10px',
-                    backgroundColor: 'var(--bg-secondary)',
-                    padding: '4px',
-                    borderRadius: '8px',
-                    border: '1px solid var(--border-color)'
-                  }}>
-                    <button
-                      onClick={() => setPaymentMethod('cash')}
-                      style={{
-                        padding: '8px',
-                        borderRadius: '6px',
-                        border: 'none',
-                        cursor: 'pointer',
-                        fontWeight: 600,
-                        fontSize: '12px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: '6px',
-                        backgroundColor: paymentMethod === 'cash' ? 'var(--accent)' : 'transparent',
-                        color: paymentMethod === 'cash' ? '#000' : 'var(--text-secondary)'
+              <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '20px', marginTop: '24px' }}>
+                {/* Payment method selector */}
+                <div style={{ marginBottom: '20px' }}>
+                  <label style={{ fontSize: '12px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block', marginBottom: '8px' }}>Método de Pago</label>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                    <button 
+                      onClick={() => setPaymentMethod('cash')} 
+                      style={{ 
+                        padding: '10px', 
+                        fontSize: '11px', 
+                        fontWeight: 600, 
+                        textTransform: 'uppercase', 
+                        letterSpacing: '0.5px',
+                        border: '1px solid var(--border-color)',
+                        backgroundColor: paymentMethod === 'cash' ? 'var(--text-primary)' : 'transparent',
+                        color: paymentMethod === 'cash' ? 'var(--bg-primary)' : 'var(--text-primary)',
+                        cursor: 'pointer'
                       }}
                     >
-                      {paymentMethod === 'cash' && <Check size={12} />}
-                      Efectivo (Descuento)
+                      Efectivo
                     </button>
-                    <button
-                      onClick={() => setPaymentMethod('card')}
-                      style={{
-                        padding: '8px',
-                        borderRadius: '6px',
-                        border: 'none',
-                        cursor: 'pointer',
-                        fontWeight: 600,
-                        fontSize: '12px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: '6px',
-                        backgroundColor: paymentMethod === 'card' ? 'var(--accent)' : 'transparent',
-                        color: paymentMethod === 'card' ? '#000' : 'var(--text-secondary)'
+                    <button 
+                      onClick={() => setPaymentMethod('card')} 
+                      style={{ 
+                        padding: '10px', 
+                        fontSize: '11px', 
+                        fontWeight: 600, 
+                        textTransform: 'uppercase', 
+                        letterSpacing: '0.5px',
+                        border: '1px solid var(--border-color)',
+                        backgroundColor: paymentMethod === 'card' ? 'var(--text-primary)' : 'transparent',
+                        color: paymentMethod === 'card' ? 'var(--bg-primary)' : 'var(--text-primary)',
+                        cursor: 'pointer'
                       }}
                     >
-                      {paymentMethod === 'card' && <Check size={12} />}
-                      Tarjeta / Transferencia
+                      Tarjeta / Transf.
                     </button>
                   </div>
                 </div>
 
-                {/* Total */}
-                <div style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  marginBottom: '20px'
-                }}>
-                  <span style={{ fontSize: '16px', color: 'var(--text-secondary)' }}>Total:</span>
-                  <strong style={{ fontSize: '24px', color: '#fff' }}>
-                    ${getCartTotal().toLocaleString('es-MX')} MXN
-                  </strong>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                  <span style={{ fontSize: '13px', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '1px' }}>Total Estimado:</span>
+                  <span style={{ fontSize: '20px', fontWeight: 600 }}>${getCartTotal().toLocaleString('es-MX')} MXN</span>
                 </div>
 
-                <button
+                <button 
                   onClick={handleCheckout}
-                  className="btn btn-primary"
-                  style={{ width: '100%', padding: '12px', fontSize: '15px' }}
+                  style={{
+                    width: '100%',
+                    backgroundColor: 'var(--text-primary)',
+                    color: 'var(--bg-primary)',
+                    border: 'none',
+                    padding: '14px',
+                    fontSize: '12px',
+                    fontWeight: 600,
+                    textTransform: 'uppercase',
+                    letterSpacing: '2px',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px'
+                  }}
                 >
-                  Confirmar y enviar WhatsApp
+                  Pedido por WhatsApp
                 </button>
               </div>
             )}
+
           </div>
         </div>
       )}
 
-      {/* Footer */}
+      {/* Aesthetic Minimal Footer */}
       <footer style={{
-        padding: '32px 24px',
-        textAlign: 'center',
+        backgroundColor: 'var(--bg-secondary)',
         borderTop: '1px solid var(--border-color)',
-        color: 'var(--text-muted)',
+        padding: '48px 32px',
+        textAlign: 'center',
         fontSize: '13px',
-        backgroundColor: 'var(--bg-secondary)'
+        color: 'var(--text-secondary)'
       }}>
-        <p>© 2026 TACUCHE Estudio. Todos los derechos reservados.</p>
-        <p style={{ marginTop: '4px' }}>Hecho en México. Confección ética artesanal.</p>
+        <div style={{ display: 'flex', justifyContent: 'center', gap: '24px', marginBottom: '16px' }}>
+          <img src="/logo-black.png" alt="TACUCHE" style={{ height: '36px', objectFit: 'contain' }} />
+        </div>
+        <p style={{ margin: '0 0 12px 0' }}>Diseño y Confección Lenta en Ciudad de México</p>
+        <p style={{ fontSize: '11px', color: 'var(--text-muted)', margin: 0 }}>&copy; {new Date().getFullYear()} Tacuche. Todos los derechos reservados.</p>
       </footer>
     </div>
   );
