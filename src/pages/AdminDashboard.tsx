@@ -559,6 +559,58 @@ function CotizadorTab({ insumos, packagingCost, products, onSave }: CotizadorPro
   const [stock, setStock] = useState<number>(5);
   const [imageUrl, setImageUrl] = useState('');
   const [isActive, setIsActive] = useState(true);
+  const [uploadingImage, setUploadingImage] = useState(false);
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingImage(true);
+    try {
+      if (isUsingMock) {
+        // Read file as Base64 Data URL
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setImageUrl(reader.result as string);
+          setUploadingImage(false);
+        };
+        reader.readAsDataURL(file);
+      } else {
+        // Upload to Supabase Storage bucket 'product-images'
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${Math.random().toString(36).substring(2)}.${fileExt}`;
+        const filePath = `${fileName}`;
+
+        // Ensure file is uploaded to the bucket
+        const { error: uploadError } = await supabase.storage
+          .from('product-images')
+          .upload(filePath, file);
+
+        if (uploadError) {
+          console.warn("Supabase storage upload failed, falling back to Base64:", uploadError);
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            setImageUrl(reader.result as string);
+            setUploadingImage(false);
+          };
+          reader.readAsDataURL(file);
+          return;
+        }
+
+        // Get public URL
+        const { data } = supabase.storage
+          .from('product-images')
+          .getPublicUrl(filePath);
+
+        setImageUrl(data.publicUrl);
+        setUploadingImage(false);
+      }
+    } catch (err) {
+      console.error("Image upload error:", err);
+      alert("Error al subir la imagen. Usando respaldo...");
+      setUploadingImage(false);
+    }
+  };
 
   // Materials added to current garment
   const [materials, setMaterials] = useState<ProductMaterial[]>([]);
@@ -865,8 +917,56 @@ function CotizadorTab({ insumos, packagingCost, products, onSave }: CotizadorPro
           </div>
 
           <div className="form-group">
-            <label className="form-label">URL de Imagen (Unsplash, etc.)</label>
-            <input type="text" className="form-input" value={imageUrl} onChange={e => setImageUrl(e.target.value)} placeholder="https://ejemplo.com/prenda.jpg" />
+            <label className="form-label">Imagen de la Prenda</label>
+            <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+              <input
+                type="text"
+                className="form-input"
+                style={{ flex: 1 }}
+                value={imageUrl}
+                onChange={e => setImageUrl(e.target.value)}
+                placeholder="Escribe la URL de la imagen..."
+              />
+              
+              <label className="btn btn-secondary" style={{ whiteSpace: 'nowrap', cursor: 'pointer', margin: 0, padding: '10px 14px' }}>
+                {uploadingImage ? 'Subiendo...' : 'Subir Archivo'}
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  style={{ display: 'none' }}
+                  disabled={uploadingImage}
+                />
+              </label>
+            </div>
+            
+            {imageUrl && (
+              <div style={{ marginTop: '10px', position: 'relative', width: '100px', height: '100px', border: '1px solid var(--border-color)', borderRadius: '8px', overflow: 'hidden' }}>
+                <img src={imageUrl} alt="Vista previa" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                <button
+                  type="button"
+                  onClick={() => setImageUrl('')}
+                  style={{
+                    position: 'absolute',
+                    top: '4px',
+                    right: '4px',
+                    backgroundColor: 'rgba(0,0,0,0.6)',
+                    border: 'none',
+                    borderRadius: '50%',
+                    color: '#fff',
+                    width: '20px',
+                    height: '20px',
+                    cursor: 'pointer',
+                    fontSize: '11px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}
+                >
+                  &times;
+                </button>
+              </div>
+            )}
           </div>
 
           <button type="submit" className="btn btn-primary" style={{ padding: '12px' }}>
