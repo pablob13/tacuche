@@ -111,16 +111,8 @@ export default function AdminDashboard() {
         gap: '32px'
       }}>
         <div>
-          <h2 style={{
-            fontSize: '24px',
-            letterSpacing: '1.5px',
-            color: '#fff',
-            fontWeight: 700,
-            fontFamily: 'var(--font-heading)'
-          }}>
-            TACUCHE
-          </h2>
-          <span style={{ fontSize: '11px', color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '1.5px' }}>
+          <img src="/logo.png" alt="TACUCHE" style={{ height: '36px', objectFit: 'contain', marginBottom: '12px', display: 'block' }} />
+          <span style={{ fontSize: '11px', color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '1.5px', display: 'block' }}>
             Panel de Control
           </span>
         </div>

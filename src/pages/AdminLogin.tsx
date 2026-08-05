@@ -93,7 +93,7 @@ export default function AdminLogin() {
           }}>
             <Lock size={28} />
           </div>
-          <h2 style={{ fontSize: '24px', color: '#fff', marginBottom: '8px' }}>Atelier Tacuche</h2>
+          <img src="/logo.png" alt="TACUCHE" style={{ height: '40px', objectFit: 'contain', margin: '16px auto 12px auto', display: 'block' }} />
           <p className="text-muted" style={{ fontSize: '14px' }}>Panel de Control del Negocio</p>
         </div>
 
