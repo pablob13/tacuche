@@ -1,81 +1,96 @@
 import type { Insumo, PackagingComponent, Product, Expense, Revenue } from '../types';
 
-// Default Insumos
+// Default Insumos from Excel
 const defaultInsumos: Insumo[] = [
-  { id: 'i1', name: 'Chakiras', unit: 'gramos', quantity_per_unit: 500, price: 75, store: 'Mercería' },
+  { id: 'i1', name: 'Chakiras', unit: 'gramos', quantity_per_unit: 500, price: 75, store: 'Centro' },
   { id: 'i2', name: 'Ojillos OK145N', unit: 'millar', quantity_per_unit: 1000, price: 189.53, store: 'Ganon' },
   { id: 'i3', name: 'Ojillos OL3NE', unit: 'millar', quantity_per_unit: 1000, price: 300.00, store: 'Ganon' },
   { id: 'i4', name: 'Hilos Recta', unit: 'metros', quantity_per_unit: 1000, price: 218.00, store: 'Centro' },
   { id: 'i5', name: 'Hilos Over', unit: 'metros', quantity_per_unit: 1600, price: 62.00, store: 'Nuevo Mundo' },
-  { id: 'i6', name: 'Chakirón', unit: 'gramos', quantity_per_unit: 500, price: 75, store: 'Mercería' },
+  { id: 'i6', name: 'Chakirón', unit: 'gramos', quantity_per_unit: 500, price: 75, store: 'Centro' },
   { id: 'i7', name: 'Tinte Mariposa', unit: 'paquete', quantity_per_unit: 1, price: 28.75, store: 'Farmacia' },
   { id: 'i8', name: 'Listón 1"', unit: 'metros', quantity_per_unit: 50, price: 90.00, store: 'Fantasías Miguel' },
   { id: 'i9', name: 'Listón 1 1/2"', unit: 'metros', quantity_per_unit: 50, price: 160.00, store: 'Fantasías Miguel' },
+  { id: 'i10', name: 'Hilaza Dalia', unit: 'pieza', quantity_per_unit: 1, price: 94.00, store: 'Centro' },
+  { id: 'i11', name: 'Lino Azul', unit: 'metros', quantity_per_unit: 1, price: 74.00, store: 'Centro' },
+  { id: 'i12', name: 'Gabardina', unit: 'metros', quantity_per_unit: 1, price: 299.00, store: 'Centro' },
+  { id: 'i13', name: 'Telas Flores', unit: 'metros', quantity_per_unit: 1, price: 140.00, store: 'Centro' },
+  { id: 'i14', name: 'Entretelas', unit: 'metros', quantity_per_unit: 1, price: 200.00, store: 'Centro' },
+  { id: 'i15', name: 'Agujetas', unit: 'metros', quantity_per_unit: 1, price: 60.00, store: 'Centro' },
+  { id: 'i16', name: 'Meclilla', unit: 'metros', quantity_per_unit: 1, price: 70.00, store: 'Centro' },
+  { id: 'i17', name: 'Forro', unit: 'metros', quantity_per_unit: 1, price: 30.00, store: 'Centro' },
+  { id: 'i18', name: 'Telas Cebra', unit: 'metros', quantity_per_unit: 1, price: 30.00, store: 'Centro' },
+  { id: 'i19', name: 'Telas Cuadros', unit: 'metros', quantity_per_unit: 1, price: 30.00, store: 'Centro' },
+  { id: 'i20', name: 'Tela Puntas', unit: 'metros', quantity_per_unit: 1, price: 30.00, store: 'Centro' },
+  { id: 'i21', name: 'Hilo Lino', unit: 'metros', quantity_per_unit: 1, price: 120.00, store: 'Centro' },
+  { id: 'i22', name: 'Telas Manta', unit: 'metros', quantity_per_unit: 1, price: 60.00, store: 'Centro' },
+  { id: 'i23', name: 'Estambres', unit: 'unidad', quantity_per_unit: 1, price: 400.00, store: 'Centro' },
+  { id: 'i24', name: 'Encaje', unit: 'metros', quantity_per_unit: 1, price: 50.00, store: 'Centro' },
+  { id: 'i25', name: 'Telas Lino', unit: 'metros', quantity_per_unit: 1, price: 100.00, store: 'Centro' },
+  { id: 'i26', name: 'Telas Botones', unit: 'unidad', quantity_per_unit: 1, price: 17.00, store: 'Centro' }
 ].map(item => ({
   ...item,
   unit_price: item.price / item.quantity_per_unit
 }));
 
-// Default Packaging Components
+// Default Packaging Components summing up to exactly $140.00 from Excel
 const defaultPackaging: PackagingComponent[] = [
-  { id: 'p1', name: 'Bolsa de manta (manta)', price: 100.00, unit: 'Metro', units_required: 1.0, capacity_max: 7.5 },
-  { id: 'p2', name: 'Bolsa de manta (hilo)', price: 218.00, unit: 'Carrete 1000m', units_required: 4.0, capacity_max: 1000 },
-  { id: 'p3', name: 'Bolsa de manta (ojillos)', price: 300.00, unit: 'Millar', units_required: 2.0, capacity_max: 1000 },
-  { id: 'p4', name: 'Bolsa de manta (listón)', price: 75.00, unit: 'Metros', units_required: 1.5, capacity_max: 50 },
-  { id: 'p5', name: 'Bolsa de manta (mano de obra)', price: 150.00, unit: 'Hora', units_required: 0.17, capacity_max: 1 },
+  { id: 'p1', name: 'Bolsa de Manta', price: 70.00, unit: 'Pieza', units_required: 1.0, capacity_max: 1 },
+  { id: 'p2', name: 'Etiqueta + Listón', price: 30.00, unit: 'Pieza', units_required: 1.0, capacity_max: 1 },
+  { id: 'p3', name: 'Mano de Obra Empaque', price: 40.00, unit: 'Pieza', units_required: 1.0, capacity_max: 1 }
 ].map(item => ({
   ...item,
   cost_per_unit: (item.price * item.units_required) / item.capacity_max
 }));
 
-// Default Products (Prendas)
+// Default Products (Prendas reales del Excel)
 const defaultProducts: Product[] = [
   {
     id: 'prod1',
     name: 'Suéter Negro',
-    description: 'Suéter tejido artesanal en color negro con detalles de ojillos.',
+    description: 'Suéter tejido premium en color negro con detalles artesanales.',
     base_cost: 70,
-    labor_hours: 6,
+    labor_hours: 5.6,
     labor_hourly_rate: 150,
-    desired_margin: 33,
+    desired_margin: 30,
     price_cash: 1600,
     price_card: 1700,
     designer: 'Tani',
     stock: 10,
-    images: ['https://images.unsplash.com/photo-1556905055-8f358a7a47b2?q=80&w=600&auto=format&fit=crop'],
+    images: ['https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?q=80&w=600&auto=format&fit=crop'],
     is_active: true,
     materials: [
-      { insumo_id: 'i4', quantity_used: 10 },
-      { insumo_id: 'i2', quantity_used: 6 }
+      { insumo_id: 'i10', quantity_used: 0.5 }, // Hilaza
+      { insumo_id: 'i4', quantity_used: 10 } // Hilos recta
     ]
   },
   {
     id: 'prod2',
     name: 'Falda Militar',
-    description: 'Falda con diseño estructurado estilo militar, resistente y moderna.',
+    description: 'Falda con corte estructurado estilo militar, confeccionada con detalles únicos.',
     base_cost: 70,
-    labor_hours: 8,
+    labor_hours: 6.0,
     labor_hourly_rate: 150,
-    desired_margin: 33,
+    desired_margin: 30,
     price_cash: 1600,
     price_card: 1700,
-    designer: 'Maripy',
+    designer: 'Gabriela',
     stock: 5,
     images: ['https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?q=80&w=600&auto=format&fit=crop'],
     is_active: true,
     materials: [
-      { insumo_id: 'i4', quantity_used: 8 },
-      { insumo_id: 'i1', quantity_used: 20 }
+      { insumo_id: 'i1', quantity_used: 2 }, // Chakiras
+      { insumo_id: 'i4', quantity_used: 10 } // Hilos recta
     ]
   },
   {
     id: 'prod3',
     name: 'Corset Negro',
-    description: 'Corset premium entallado negro con listones y herrajes.',
-    base_cost: 100,
-    labor_hours: 15,
+    description: 'Corset entallado premium en color negro con listones y ojillos metálicos.',
+    base_cost: 70,
+    labor_hours: 18.0,
     labor_hourly_rate: 150,
-    desired_margin: 35,
+    desired_margin: 22,
     price_cash: 3600,
     price_card: 3800,
     designer: 'Maripy',
@@ -83,89 +98,305 @@ const defaultProducts: Product[] = [
     images: ['https://images.unsplash.com/photo-1618220179428-22790b461013?q=80&w=600&auto=format&fit=crop'],
     is_active: true,
     materials: [
-      { insumo_id: 'i3', quantity_used: 12 },
-      { insumo_id: 'i8', quantity_used: 3 }
+      { insumo_id: 'i3', quantity_used: 10 }, // Ojillos
+      { insumo_id: 'i8', quantity_used: 1.5 } // Listón 1"
     ]
   },
   {
     id: 'prod4',
     name: 'Espurucunchitos',
-    description: 'Prenda ligera de la colección Tacuche.',
-    base_cost: 60,
-    labor_hours: 4.5,
+    description: 'Prenda fresca y ligera de la colección Tacuche.',
+    base_cost: 70,
+    labor_hours: 4.0,
     labor_hourly_rate: 150,
-    desired_margin: 33,
+    desired_margin: 30,
     price_cash: 1200,
     price_card: 1300,
     designer: 'Maripy',
     stock: 12,
-    images: ['https://images.unsplash.com/photo-1434389677669-e08b4cac3105?q=80&w=600&auto=format&fit=crop'],
+    images: ['https://images.unsplash.com/photo-1595777457583-95e059d581b8?q=80&w=600&auto=format&fit=crop'],
     is_active: true,
-    materials: []
+    materials: [
+      { insumo_id: 'i4', quantity_used: 20 }
+    ]
   },
   {
     id: 'prod5',
     name: 'Top Vaca',
-    description: 'Top corto con estampado de vaca y acabados artesanales.',
-    base_cost: 50,
-    labor_hours: 4,
+    description: 'Top corto con estampado temático de vaca y costuras visibles.',
+    base_cost: 70,
+    labor_hours: 4.0,
     labor_hourly_rate: 150,
-    desired_margin: 33,
+    desired_margin: 30,
     price_cash: 1100,
     price_card: 1150,
     designer: 'Maripy',
     stock: 4,
-    images: ['https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=600&auto=format&fit=crop'],
+    images: ['https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?q=80&w=600&auto=format&fit=crop'],
     is_active: true,
-    materials: []
+    materials: [
+      { insumo_id: 'i4', quantity_used: 30 }
+    ]
   },
   {
     id: 'prod6',
     name: 'Jines Pol',
-    description: 'Pantalones premium estilizados con costuras decorativas.',
-    base_cost: 90,
-    labor_hours: 10,
+    description: 'Pantalones estilizados en gabardina fina con bolsillos funcionales.',
+    base_cost: 70,
+    labor_hours: 6.0,
     labor_hourly_rate: 150,
-    desired_margin: 33,
+    desired_margin: 30,
     price_cash: 2050,
     price_card: 2150,
     designer: 'Maripy',
     stock: 3,
-    images: ['https://images.unsplash.com/photo-1542272604-787c3835535d?q=80&w=600&auto=format&fit=crop'],
+    images: ['https://images.unsplash.com/photo-1541099649105-f69ad21f3246?q=80&w=600&auto=format&fit=crop'],
     is_active: true,
-    materials: []
+    materials: [
+      { insumo_id: 'i12', quantity_used: 1 }, // Gabardina
+      { insumo_id: 'i4', quantity_used: 30 }
+    ]
   },
   {
     id: 'prod7',
     name: 'Top Mezclilla',
-    description: 'Top artesanal en mezclilla reciclada de alta calidad.',
-    base_cost: 60,
-    labor_hours: 5,
+    description: 'Top confeccionado en mezclilla recuperada de alta durabilidad.',
+    base_cost: 70,
+    labor_hours: 4.0,
     labor_hourly_rate: 150,
-    desired_margin: 33,
+    desired_margin: 30,
     price_cash: 1200,
     price_card: 1300,
     designer: 'Tani',
     stock: 8,
-    images: ['https://images.unsplash.com/photo-1576566588028-4147f3842f27?q=80&w=600&auto=format&fit=crop'],
+    images: ['https://images.unsplash.com/photo-1611312449412-6cefac5dc3e4?q=80&w=600&auto=format&fit=crop'],
     is_active: true,
-    materials: []
+    materials: [
+      { insumo_id: 'i16', quantity_used: 0.2 },
+      { insumo_id: 'i4', quantity_used: 4 }
+    ]
   },
   {
     id: 'prod8',
     name: 'Hoodie Flores',
-    description: 'Sudadera premium bordada a mano con motivos florales.',
-    base_cost: 80,
-    labor_hours: 7,
+    description: 'Sudadera premium bordada a mano con flores de colores vivos.',
+    base_cost: 70,
+    labor_hours: 6.0,
     labor_hourly_rate: 150,
-    desired_margin: 33,
+    desired_margin: 30,
     price_cash: 1800,
     price_card: 1900,
     designer: 'Maripy',
     stock: 6,
     images: ['https://images.unsplash.com/photo-1556821840-3a63f95609a7?q=80&w=600&auto=format&fit=crop'],
     is_active: true,
-    materials: []
+    materials: [
+      { insumo_id: 'i13', quantity_used: 0.4 },
+      { insumo_id: 'i14', quantity_used: 0.2 }
+    ]
+  },
+  {
+    id: 'prod9',
+    name: 'Top Negro Ojillos',
+    description: 'Top minimalista con tiras ajustables y ojillos de metal.',
+    base_cost: 70,
+    labor_hours: 3.0,
+    labor_hourly_rate: 150,
+    desired_margin: 30,
+    price_cash: 1000,
+    price_card: 1050,
+    designer: 'Tani',
+    stock: 7,
+    images: ['https://images.unsplash.com/photo-1509631179647-0177331693ae?q=80&w=600&auto=format&fit=crop'],
+    is_active: true,
+    materials: [
+      { insumo_id: 'i2', quantity_used: 100 },
+      { insumo_id: 'i4', quantity_used: 3 }
+    ]
+  },
+  {
+    id: 'prod10',
+    name: 'Top Cebra Huipil',
+    description: 'Fusión de estampado cebra con corte tipo huipil mexicano.',
+    base_cost: 70,
+    labor_hours: 8.0,
+    labor_hourly_rate: 150,
+    desired_margin: 30,
+    price_cash: 2100,
+    price_card: 2200,
+    designer: 'Tani',
+    stock: 4,
+    images: ['https://images.unsplash.com/photo-1603252109303-2751441dd157?q=80&w=600&auto=format&fit=crop'],
+    is_active: true,
+    materials: [
+      { insumo_id: 'i18', quantity_used: 0.5 },
+      { insumo_id: 'i17', quantity_used: 0.5 }
+    ]
+  },
+  {
+    id: 'prod11',
+    name: 'Corset Mau',
+    description: 'Corset estructurado color lavanda con listones cruzados.',
+    base_cost: 70,
+    labor_hours: 7.0,
+    labor_hourly_rate: 150,
+    desired_margin: 30,
+    price_cash: 1900,
+    price_card: 2000,
+    designer: 'Tani',
+    stock: 2,
+    images: ['https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?q=80&w=600&auto=format&fit=crop'],
+    is_active: true,
+    materials: [
+      { insumo_id: 'i17', quantity_used: 0.8 },
+      { insumo_id: 'i3', quantity_used: 80 }
+    ]
+  },
+  {
+    id: 'prod12',
+    name: 'Falda Floricienta',
+    description: 'Falda floreada asimétrica con vuelo de lino y olanes.',
+    base_cost: 68,
+    labor_hours: 9.0,
+    labor_hourly_rate: 150,
+    desired_margin: 30,
+    price_cash: 2300,
+    price_card: 2400,
+    designer: 'Tani',
+    stock: 3,
+    images: ['https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?q=80&w=600&auto=format&fit=crop'],
+    is_active: true,
+    materials: [
+      { insumo_id: 'i19', quantity_used: 0.3 },
+      { insumo_id: 'i20', quantity_used: 0.25 }
+    ]
+  },
+  {
+    id: 'prod13',
+    name: 'Pantalón Lino Azul',
+    description: 'Pantalón cómodo y fresco confeccionado en lino azul cielo.',
+    base_cost: 70,
+    labor_hours: 6.5,
+    labor_hourly_rate: 150,
+    desired_margin: 30,
+    price_cash: 1800,
+    price_card: 1900,
+    designer: 'Tani',
+    stock: 5,
+    images: ['https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?q=80&w=600&auto=format&fit=crop'],
+    is_active: true,
+    materials: [
+      { insumo_id: 'i11', quantity_used: 0.25 }
+    ]
+  },
+  {
+    id: 'prod14',
+    name: 'Pantalón Lino Negro',
+    description: 'Pantalón clásico de lino negro con cordones de ajuste.',
+    base_cost: 70,
+    labor_hours: 10.0,
+    labor_hourly_rate: 150,
+    desired_margin: 30,
+    price_cash: 2700,
+    price_card: 2850,
+    designer: 'Tani',
+    stock: 4,
+    images: ['https://images.unsplash.com/photo-1506152983158-b4a74a01c721?q=80&w=600&auto=format&fit=crop'],
+    is_active: true,
+    materials: [
+      { insumo_id: 'i21', quantity_used: 1 }
+    ]
+  },
+  {
+    id: 'prod15',
+    name: 'Bolsa Hippie',
+    description: 'Bolso tejido a mano estilo bohemio con forro interno.',
+    base_cost: 70,
+    labor_hours: 7.5,
+    labor_hourly_rate: 150,
+    desired_margin: 30,
+    price_cash: 2100,
+    price_card: 2200,
+    designer: 'Tani',
+    stock: 9,
+    images: ['https://images.unsplash.com/photo-1529458083742-20c24233ccab?q=80&w=600&auto=format&fit=crop'],
+    is_active: true,
+    materials: [
+      { insumo_id: 'i22', quantity_used: 2 }
+    ]
+  },
+  {
+    id: 'prod16',
+    name: 'Jeans Pompas',
+    description: 'Jeans de mezclilla con ajuste y moldura trasera premium.',
+    base_cost: 70,
+    labor_hours: 10.0,
+    labor_hourly_rate: 150,
+    desired_margin: 30,
+    price_cash: 2650,
+    price_card: 2800,
+    designer: 'Maripy',
+    stock: 3,
+    images: ['https://images.unsplash.com/photo-1542272604-787c3835535d?q=80&w=600&auto=format&fit=crop'],
+    is_active: true,
+    materials: [
+      { insumo_id: 'i16', quantity_used: 1.7 }
+    ]
+  },
+  {
+    id: 'prod17',
+    name: 'Tshirt Foto',
+    description: 'Playera de algodón de alta calidad con estampado fotográfico y estambres.',
+    base_cost: 70,
+    labor_hours: 6.0,
+    labor_hourly_rate: 150,
+    desired_margin: 30,
+    price_cash: 2200,
+    price_card: 2300,
+    designer: 'Tani',
+    stock: 15,
+    images: ['https://images.unsplash.com/photo-1521572267360-ee0c2909d518?q=80&w=600&auto=format&fit=crop'],
+    is_active: true,
+    materials: [
+      { insumo_id: 'i23', quantity_used: 1 }
+    ]
+  },
+  {
+    id: 'prod18',
+    name: 'Hoodie Boca',
+    description: 'Sudadera premium en color block con labios bordados.',
+    base_cost: 70,
+    labor_hours: 5.0,
+    labor_hourly_rate: 150,
+    desired_margin: 30,
+    price_cash: 1500,
+    price_card: 1600,
+    designer: 'Maripy',
+    stock: 8,
+    images: ['https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?q=80&w=600&auto=format&fit=crop'],
+    is_active: true,
+    materials: [
+      { insumo_id: 'i17', quantity_used: 0.6 }
+    ]
+  },
+  {
+    id: 'prod19',
+    name: 'Falda Blanca Lino',
+    description: 'Falda fresca en color blanco de lino con encajes decorativos.',
+    base_cost: 70,
+    labor_hours: 6.0,
+    labor_hourly_rate: 150,
+    desired_margin: 30,
+    price_cash: 1700,
+    price_card: 1800,
+    designer: 'Tani',
+    stock: 5,
+    images: ['https://images.unsplash.com/photo-1583496661160-fb488b2c1a82?q=80&w=600&auto=format&fit=crop'],
+    is_active: true,
+    materials: [
+      { insumo_id: 'i24', quantity_used: 0.8 },
+      { insumo_id: 'i25', quantity_used: 0.8 }
+    ]
   }
 ];
 
@@ -190,11 +421,9 @@ const defaultExpenses: Expense[] = [
 
 // Default Revenues (Ventas mock)
 const defaultRevenues: Revenue[] = [
-  { id: 'r1', date: '2026-06-15', product_id: 'prod1', quantity: 2, total_amount: 3200, profit: 1200, payment_method: 'Cash', recorded_by: 'Tani', notes: 'Vendido en bazar' },
-  { id: 'r2', date: '2026-06-18', product_id: 'prod2', quantity: 1, total_amount: 1700, profit: 450, payment_method: 'Card', recorded_by: 'Maripy', notes: 'Cliente instagram' },
-  { id: 'r3', date: '2026-06-25', product_id: 'prod3', quantity: 1, total_amount: 3600, profit: 1100, payment_method: 'Cash', recorded_by: 'Maripy', notes: 'Venta directa' },
-  { id: 'r4', date: '2026-07-02', product_id: 'prod7', quantity: 1, total_amount: 1200, profit: 400, payment_method: 'Cash', recorded_by: 'Tani' },
-  { id: 'r5', date: '2026-07-05', product_id: 'prod5', quantity: 1, total_amount: 1150, profit: 450, payment_method: 'Card', recorded_by: 'Maripy' }
+  { id: 'r1', date: '2026-06-15', product_id: 'prod1', quantity: 2, total_amount: 3200, profit: 1006, payment_method: 'Cash', recorded_by: 'Tani', notes: 'Vendido en bazar' },
+  { id: 'r2', date: '2026-06-18', product_id: 'prod2', quantity: 1, total_amount: 1700, profit: 518, payment_method: 'Card', recorded_by: 'Maripy', notes: 'Cliente instagram' },
+  { id: 'r3', date: '2026-06-25', product_id: 'prod3', quantity: 1, total_amount: 3600, profit: 751, payment_method: 'Cash', recorded_by: 'Maripy', notes: 'Venta directa' }
 ];
 
 // Helper to initialize localStorage if empty
