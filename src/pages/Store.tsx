@@ -132,7 +132,7 @@ export default function Store() {
     }}>
       {/* Dynamic Fonts Import */}
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=Outfit:wght@300;400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=Outfit:wght@300;400;500;600;700&family=Sedgwick+Ave+Display&display=swap');
         
         .lookbook-link {
           font-size: 13px;
@@ -345,12 +345,13 @@ export default function Store() {
               Atelier Co-Diseñado
             </span>
             <h1 style={{ 
-              fontFamily: "'Cormorant Garamond', serif", 
-              fontSize: 'clamp(36px, 6vw, 64px)', 
+              fontFamily: "'Sedgwick Ave Display', cursive", 
+              fontSize: 'clamp(42px, 8vw, 72px)', 
               color: '#fff', 
               margin: '0 0 16px 0', 
-              fontWeight: 300,
-              lineHeight: 1.1
+              fontWeight: 400,
+              lineHeight: 1.1,
+              letterSpacing: '1px'
             }}>
               {settings?.store_title || 'Colección de Autor'}
             </h1>
@@ -453,9 +454,10 @@ export default function Store() {
           marginBottom: '32px'
         }}>
           <h3 style={{ 
-            fontFamily: "'Cormorant Garamond', serif", 
-            fontSize: '28px', 
-            fontWeight: 400 
+            fontFamily: "'Sedgwick Ave Display', cursive", 
+            fontSize: '36px', 
+            fontWeight: 400,
+            letterSpacing: '1px'
           }}>
             Catálogo de Prendas
           </h3>
