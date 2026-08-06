@@ -122,6 +122,7 @@ export default function Store() {
     : products.filter(p => p.designer.toLowerCase() === filterDesigner.toLowerCase());
 
   return (
+    <>
     <div className="store-container fade-in" style={{ 
       backgroundColor: 'var(--bg-primary)', 
       color: 'var(--text-primary)', 
@@ -679,7 +680,26 @@ export default function Store() {
       </section>
 
       {/* Slide-out Shopping Cart */}
-      {isCartOpen && (
+
+
+      {/* Aesthetic Minimal Footer */}
+      <footer style={{
+        backgroundColor: 'var(--bg-secondary)',
+        borderTop: '1px solid var(--border-color)',
+        padding: '48px 32px',
+        textAlign: 'center',
+        fontSize: '13px',
+        color: 'var(--text-secondary)'
+      }}>
+        <div style={{ display: 'flex', justifyContent: 'center', gap: '24px', marginBottom: '16px' }}>
+          <img src="/logo-black.png" alt="TACUCHE" style={{ height: '36px', objectFit: 'contain' }} />
+        </div>
+        <p style={{ margin: '0 0 12px 0' }}>Diseño y Confección Lenta en Ciudad de México</p>
+        <p style={{ fontSize: '11px', color: 'var(--text-muted)', margin: 0 }}>&copy; {new Date().getFullYear()} Tacuche. Todos los derechos reservados.</p>
+      </footer>
+    </div>
+
+          {isCartOpen && (
         <div style={{
           position: 'fixed',
           top: 0,
@@ -701,7 +721,7 @@ export default function Store() {
             boxShadow: '-4px 0 30px rgba(0,0,0,0.15)',
             display: 'flex',
             flexDirection: 'column',
-            padding: '32px'
+            padding: '24px 16px'
           }} onClick={e => e.stopPropagation()}>
             
             {/* Cart Header */}
@@ -818,22 +838,6 @@ export default function Store() {
           </div>
         </div>
       )}
-
-      {/* Aesthetic Minimal Footer */}
-      <footer style={{
-        backgroundColor: 'var(--bg-secondary)',
-        borderTop: '1px solid var(--border-color)',
-        padding: '48px 32px',
-        textAlign: 'center',
-        fontSize: '13px',
-        color: 'var(--text-secondary)'
-      }}>
-        <div style={{ display: 'flex', justifyContent: 'center', gap: '24px', marginBottom: '16px' }}>
-          <img src="/logo-black.png" alt="TACUCHE" style={{ height: '36px', objectFit: 'contain' }} />
-        </div>
-        <p style={{ margin: '0 0 12px 0' }}>Diseño y Confección Lenta en Ciudad de México</p>
-        <p style={{ fontSize: '11px', color: 'var(--text-muted)', margin: 0 }}>&copy; {new Date().getFullYear()} Tacuche. Todos los derechos reservados.</p>
-      </footer>
-    </div>
+    </>
   );
 }
