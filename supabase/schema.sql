@@ -208,3 +208,28 @@ ON public.store_settings FOR ALL
 TO authenticated 
 USING (true) 
 WITH CHECK (true);
+
+-- SHIPPINGS TABLE:
+CREATE TABLE IF NOT EXISTS public.shippings (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  customer_name TEXT NOT NULL,
+  address TEXT NOT NULL,
+  city TEXT NOT NULL,
+  postal_code TEXT NOT NULL,
+  tracking_number TEXT,
+  courier TEXT, -- DHL, FedEx, Estafeta, etc.
+  status TEXT NOT NULL CHECK (status IN ('Pending', 'Shipped', 'Delivered')) DEFAULT 'Pending',
+  shipping_cost NUMERIC DEFAULT 0.0,
+  notes TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- Enable RLS
+ALTER TABLE public.shippings ENABLE ROW LEVEL SECURITY;
+
+-- Auth users can do anything on shippings
+CREATE POLICY "Auth All Shippings" 
+ON public.shippings FOR ALL 
+TO authenticated 
+USING (true) 
+WITH CHECK (true);

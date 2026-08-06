@@ -1,4 +1,4 @@
-import type { Insumo, PackagingComponent, Product, Expense, Revenue, CalendarEvent, StoreSettings } from '../types';
+import type { Insumo, PackagingComponent, Product, Expense, Revenue, CalendarEvent, StoreSettings, Shipping } from '../types';
 
 // Default Insumos from Excel
 const defaultInsumos: Insumo[] = [
@@ -448,6 +448,12 @@ const defaultSettings: StoreSettings = {
   category_faldas_url: 'https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?q=80&w=600&auto=format&fit=crop'
 };
 
+// Default Shippings
+const defaultShippings: Shipping[] = [
+  { id: 'ship1', customer_name: 'Sofía Hernández', address: 'Av. Álvaro Obregón 120, Col. Roma Norte', city: 'CDMX', postal_code: '06700', tracking_number: 'FedEx 784920194829', courier: 'FedEx', status: 'Shipped', shipping_cost: 150.00, notes: 'Entregar por la tarde' },
+  { id: 'ship2', customer_name: 'Alejandra Gómez', address: 'Calle Querétaro 54, Col. Roma Sur', city: 'CDMX', postal_code: '06760', tracking_number: '', courier: '', status: 'Pending', shipping_cost: 0.00, notes: 'Recoge en Showroom' }
+];
+
 // Helper to initialize localStorage if empty
 const initLocalStorage = () => {
   if (!localStorage.getItem('tacuche_insumos')) {
@@ -470,6 +476,9 @@ const initLocalStorage = () => {
   }
   if (!localStorage.getItem('tacuche_settings')) {
     localStorage.setItem('tacuche_settings', JSON.stringify(defaultSettings));
+  }
+  if (!localStorage.getItem('tacuche_shippings')) {
+    localStorage.setItem('tacuche_shippings', JSON.stringify(defaultShippings));
   }
 };
 
@@ -631,6 +640,30 @@ export const mockDb = {
     save: (item: StoreSettings): StoreSettings => {
       localStorage.setItem('tacuche_settings', JSON.stringify(item));
       return item;
+    }
+  },
+
+  shippings: {
+    getAll: (): Shipping[] => {
+      initLocalStorage();
+      return JSON.parse(localStorage.getItem('tacuche_shippings') || '[]');
+    },
+    save: (item: Shipping) => {
+      const items = mockDb.shippings.getAll();
+      const existingIdx = items.findIndex(i => i.id === item.id);
+      const newItem = { ...item };
+      if (existingIdx > -1) {
+        items[existingIdx] = newItem;
+      } else {
+        newItem.id = newItem.id || Math.random().toString(36).substr(2, 9);
+        items.push(newItem);
+      }
+      localStorage.setItem('tacuche_shippings', JSON.stringify(items));
+      return newItem;
+    },
+    delete: (id: string) => {
+      const items = mockDb.shippings.getAll().filter(i => i.id !== id);
+      localStorage.setItem('tacuche_shippings', JSON.stringify(items));
     }
   }
 };

@@ -9,6 +9,7 @@ TRUNCATE public.packaging_components CASCADE;
 TRUNCATE public.events CASCADE;
 TRUNCATE public.expenses CASCADE;
 TRUNCATE public.store_settings CASCADE;
+TRUNCATE public.shippings CASCADE;
 
 -- 2. Insert INSUMOS (Raw Materials)
 INSERT INTO public.insumos (id, name, unit, quantity_per_unit, price, store) VALUES
@@ -168,3 +169,8 @@ ON CONFLICT (id) DO UPDATE SET
   category_sueteres_url = EXCLUDED.category_sueteres_url,
   category_pantalones_url = EXCLUDED.category_pantalones_url,
   category_faldas_url = EXCLUDED.category_faldas_url;
+
+-- 9. Insert SHIPPINGS
+INSERT INTO public.shippings (id, customer_name, address, city, postal_code, tracking_number, courier, status, shipping_cost, notes) VALUES
+('a1a18204-586b-4e8c-8c7c-473d09a25d01', 'Sofía Hernández', 'Av. Álvaro Obregón 120, Col. Roma Norte', 'CDMX', '06700', 'FedEx 784920194829', 'FedEx', 'Shipped', 150.00, 'Entregar por la tarde'),
+('a1a18204-586b-4e8c-8c7c-473d09a25d02', 'Alejandra Gómez', 'Calle Querétaro 54, Col. Roma Sur', 'CDMX', '06760', '', '', 'Pending', 0.00, 'Recoge en Showroom');

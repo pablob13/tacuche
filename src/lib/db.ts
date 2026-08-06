@@ -1,6 +1,6 @@
 import { supabase, isSupabaseConfigured } from './supabase';
 import { mockDb } from './mockData';
-import type { Insumo, PackagingComponent, Product, Expense, Revenue, CalendarEvent, StoreSettings } from '../types';
+import type { Insumo, PackagingComponent, Product, Expense, Revenue, CalendarEvent, StoreSettings, Shipping } from '../types';
 
 export const isUsingMock = !isSupabaseConfigured;
 
@@ -260,6 +260,44 @@ export const db = {
         .single();
       if (error) throw error;
       return data;
+    }
+  },
+
+  shippings: {
+    getAll: async (): Promise<Shipping[]> => {
+      if (isUsingMock) return mockDb.shippings.getAll();
+      try {
+        const { data, error } = await supabase
+          .from('shippings')
+          .select('*')
+          .order('created_at', { ascending: false });
+        if (error) throw error;
+        return data || [];
+      } catch (err) {
+        console.warn("Error getting shippings, fallback to local storage:", err);
+        return mockDb.shippings.getAll();
+      }
+    },
+    save: async (item: Shipping): Promise<Shipping> => {
+      if (isUsingMock) return mockDb.shippings.save(item);
+      const { data, error } = await supabase
+        .from('shippings')
+        .upsert(item)
+        .select()
+        .single();
+      if (error) throw error;
+      return data;
+    },
+    delete: async (id: string): Promise<void> => {
+      if (isUsingMock) {
+        mockDb.shippings.delete(id);
+        return;
+      }
+      const { error } = await supabase
+        .from('shippings')
+        .delete()
+        .eq('id', id);
+      if (error) throw error;
     }
   }
 };

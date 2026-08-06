@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import { db, isUsingMock } from '../lib/db';
-import type { Insumo, PackagingComponent, Product, Expense, Revenue, ProductMaterial, CalendarEvent } from '../types';
+import type { Insumo, PackagingComponent, Product, Expense, Revenue, ProductMaterial, CalendarEvent, Shipping } from '../types';
 import {
   LayoutDashboard,
   Calculator,
@@ -14,6 +14,7 @@ import {
   Calendar,
   Settings,
   ShoppingBag,
+  Truck,
   LogOut,
   Trash2,
   Edit,
@@ -37,7 +38,7 @@ import {
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
-  const [currentTab, setCurrentTab] = useState<'overview' | 'cotizador' | 'inventory' | 'insumos' | 'packaging' | 'expenses' | 'revenues' | 'calendar' | 'personalizar'>('overview');
+  const [currentTab, setCurrentTab] = useState<'overview' | 'cotizador' | 'inventory' | 'insumos' | 'packaging' | 'expenses' | 'revenues' | 'calendar' | 'personalizar' | 'shippings'>('overview');
   
   // Data States
   const [insumos, setInsumos] = useState<Insumo[]>([]);
@@ -46,6 +47,7 @@ export default function AdminDashboard() {
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [revenues, setRevenues] = useState<Revenue[]>([]);
   const [events, setEvents] = useState<CalendarEvent[]>([]);
+  const [shippings, setShippings] = useState<Shipping[]>([]);
   const [selectedProductId, setSelectedProductId] = useState<string>('');
   const [loading, setLoading] = useState(true);
 
@@ -67,13 +69,14 @@ export default function AdminDashboard() {
   const loadData = async () => {
     setLoading(true);
     try {
-      const [ins, pack, prod, exp, rev, evs] = await Promise.all([
+      const [ins, pack, prod, exp, rev, evs, ships] = await Promise.all([
         db.insumos.getAll(),
         db.packaging.getAll(),
         db.products.getAll(),
         db.expenses.getAll(),
         db.revenues.getAll(),
-        db.events.getAll()
+        db.events.getAll(),
+        db.shippings.getAll()
       ]);
       setInsumos(ins);
       setPackaging(pack);
@@ -81,6 +84,7 @@ export default function AdminDashboard() {
       setExpenses(exp);
       setRevenues(rev);
       setEvents(evs);
+      setShippings(ships);
     } catch (err) {
       console.error("Error loading admin data:", err);
     } finally {
@@ -198,6 +202,15 @@ export default function AdminDashboard() {
           </button>
 
           <button
+            onClick={() => setCurrentTab('shippings')}
+            className={`btn ${currentTab === 'shippings' ? 'btn-primary' : 'btn-secondary'}`}
+            style={{ justifyContent: 'flex-start', border: 'none', width: '100%' }}
+          >
+            <Truck size={18} />
+            Control de Envíos
+          </button>
+
+          <button
             onClick={() => setCurrentTab('personalizar')}
             className={`btn ${currentTab === 'personalizar' ? 'btn-primary' : 'btn-secondary'}`}
             style={{ justifyContent: 'flex-start', border: 'none', width: '100%' }}
@@ -241,6 +254,7 @@ export default function AdminDashboard() {
               {currentTab === 'revenues' && 'Registro de Ingresos / Ventas'}
               {currentTab === 'calendar' && 'Calendario de Colecciones y Actividades'}
               {currentTab === 'personalizar' && 'Personalizar Tienda en Línea'}
+              {currentTab === 'shippings' && 'Bitácora y Rastreo de Envíos'}
             </h1>
             <p style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
               {isUsingMock ? 'Modo de demostración: los datos se guardan en el navegador' : 'Conectado a la base de datos de Supabase'}
@@ -333,6 +347,13 @@ export default function AdminDashboard() {
               )}
               {currentTab === 'personalizar' && (
                 <PersonalizarTab
+                  onSave={loadData}
+                />
+              )}
+
+              {currentTab === 'shippings' && (
+                <ShippingsTab
+                  shippings={shippings}
                   onSave={loadData}
                 />
               )}
@@ -2805,6 +2826,262 @@ function PersonalizarTab({ onSave }: PersonalizarProps) {
         </div>
       </div>
 
+    </div>
+  );
+}
+
+// ==========================================
+// 9. CONTROL DE ENVÍOS (Shippings CRUD) TAB
+// ==========================================
+interface ShippingsProps {
+  shippings: Shipping[];
+  onSave: () => void;
+}
+
+function ShippingsTab({ shippings, onSave }: ShippingsProps) {
+  const [customerName, setCustomerName] = useState('');
+  const [address, setAddress] = useState('');
+  const [city, setCity] = useState('');
+  const [postalCode, setPostalCode] = useState('');
+  const [trackingNumber, setTrackingNumber] = useState('');
+  const [courier, setCourier] = useState('');
+  const [status, setStatus] = useState<'Pending' | 'Shipped' | 'Delivered'>('Pending');
+  const [shippingCost, setShippingCost] = useState<number>(0);
+  const [notes, setNotes] = useState('');
+  const [selectedShipId, setSelectedShipId] = useState<string>('');
+  const [saving, setSaving] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!customerName.trim()) return;
+
+    setSaving(true);
+    try {
+      await db.shippings.save({
+        id: selectedShipId || undefined as any,
+        customer_name: customerName,
+        address,
+        city,
+        postal_code: postalCode,
+        tracking_number: trackingNumber,
+        courier,
+        status,
+        shipping_cost: shippingCost,
+        notes
+      });
+      
+      // Reset form
+      setCustomerName('');
+      setAddress('');
+      setCity('');
+      setPostalCode('');
+      setTrackingNumber('');
+      setCourier('');
+      setStatus('Pending');
+      setShippingCost(0);
+      setNotes('');
+      setSelectedShipId('');
+      
+      onSave();
+      alert('✓ Envío guardado correctamente');
+    } catch (err) {
+      console.error(err);
+      alert('Error al guardar envío');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleEdit = (s: Shipping) => {
+    setSelectedShipId(s.id);
+    setCustomerName(s.customer_name);
+    setAddress(s.address);
+    setCity(s.city);
+    setPostalCode(s.postal_code);
+    setTrackingNumber(s.tracking_number || '');
+    setCourier(s.courier || '');
+    setStatus(s.status);
+    setShippingCost(s.shipping_cost);
+    setNotes(s.notes || '');
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('¿Estás seguro de eliminar este envío?')) return;
+    try {
+      await db.shippings.delete(id);
+      onSave();
+    } catch (err) {
+      console.error(err);
+      alert('Error al eliminar envío');
+    }
+  };
+
+  return (
+    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.8fr', gap: '32px' }} className="fade-in">
+      {/* Registry Form */}
+      <div className="card">
+        <h3 style={{ fontSize: '18px', color: 'var(--text-primary)', marginBottom: '20px' }}>
+          {selectedShipId ? 'Editar Envío' : 'Registrar Nuevo Envío'}
+        </h3>
+        
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <div className="form-group">
+            <label className="form-label">Cliente</label>
+            <input type="text" className="form-input" value={customerName} onChange={e => setCustomerName(e.target.value)} required placeholder="Nombre del destinatario" />
+          </div>
+
+          <div className="form-group">
+            <label className="form-label">Dirección Completa</label>
+            <input type="text" className="form-input" value={address} onChange={e => setAddress(e.target.value)} required placeholder="Calle, número, colonia..." />
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+            <div className="form-group">
+              <label className="form-label">Ciudad / Estado</label>
+              <input type="text" className="form-input" value={city} onChange={e => setCity(e.target.value)} required placeholder="Ej: CDMX" />
+            </div>
+            <div className="form-group">
+              <label className="form-label">Código Postal</label>
+              <input type="text" className="form-input" value={postalCode} onChange={e => setPostalCode(e.target.value)} required placeholder="Ej: 06700" />
+            </div>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+            <div className="form-group">
+              <label className="form-label">Paquetería</label>
+              <select className="form-select" value={courier} onChange={e => setCourier(e.target.value)}>
+                <option value="">-- Seleccionar --</option>
+                <option value="FedEx">FedEx</option>
+                <option value="DHL">DHL</option>
+                <option value="Estafeta">Estafeta</option>
+                <option value="Sendex">Sendex</option>
+                <option value="Redpack">Redpack</option>
+                <option value="Showroom">Recoge en Showroom</option>
+                <option value="Other">Otro</option>
+              </select>
+            </div>
+            <div className="form-group">
+              <label className="form-label">Costo de Envío</label>
+              <input type="number" className="form-input" value={shippingCost} onChange={e => setShippingCost(Number(e.target.value))} placeholder="Ej: 150" />
+            </div>
+          </div>
+
+          <div className="form-group">
+            <label className="form-label">Número de Guía (Tracking Link)</label>
+            <input type="text" className="form-input" value={trackingNumber} onChange={e => setTrackingNumber(e.target.value)} placeholder="Número de rastreo / guía" />
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '12px' }}>
+            <div className="form-group">
+              <label className="form-label">Estado del Envío</label>
+              <select className="form-select" value={status} onChange={e => setStatus(e.target.value as any)}>
+                <option value="Pending">Pendiente (Por empacar/enviar)</option>
+                <option value="Shipped">Enviado (En camino)</option>
+                <option value="Delivered">Entregado</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="form-group">
+            <label className="form-label">Notas Adicionales</label>
+            <textarea className="form-textarea" rows={2} value={notes} onChange={e => setNotes(e.target.value)} placeholder="Instrucciones de entrega, referencias..." />
+          </div>
+
+          <div style={{ display: 'flex', gap: '12px', marginTop: '8px' }}>
+            <button type="submit" className="btn btn-primary" style={{ flex: 1, padding: '12px' }} disabled={saving}>
+              <Save size={16} />
+              {selectedShipId ? 'Actualizar Envío' : 'Registrar Envío'}
+            </button>
+            {selectedShipId && (
+              <button type="button" className="btn btn-secondary" onClick={() => handleEdit({ id: '', customer_name: '', address: '', city: '', postal_code: '', status: 'Pending', shipping_cost: 0 })} style={{ padding: '12px' }}>
+                Cancelar
+              </button>
+            )}
+          </div>
+        </form>
+      </div>
+
+      {/* Tracker Dashboard Grid */}
+      <div className="card">
+        <h3 style={{ fontSize: '18px', color: 'var(--text-primary)', marginBottom: '20px' }}>
+          Bitácora y Rastreo de Envíos
+        </h3>
+        
+        {shippings.length === 0 ? (
+          <p className="text-muted">No hay envíos registrados.</p>
+        ) : (
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '13px' }}>
+              <thead>
+                <tr style={{ borderBottom: '1px solid var(--border-color)', color: 'var(--text-secondary)' }}>
+                  <th style={{ padding: '10px' }}>Cliente / Destino</th>
+                  <th style={{ padding: '10px' }}>Paquetería</th>
+                  <th style={{ padding: '10px' }}>Guía / Tracking</th>
+                  <th style={{ padding: '10px' }}>Costo</th>
+                  <th style={{ padding: '10px', textAlign: 'center' }}>Estado</th>
+                  <th style={{ padding: '10px', textAlign: 'right' }}>Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                {shippings.map(s => {
+                  let statusBg = 'rgba(245, 158, 11, 0.1)';
+                  let statusColor = 'var(--accent)';
+                  if (s.status === 'Shipped') {
+                    statusBg = 'rgba(59, 130, 246, 0.1)';
+                    statusColor = '#3b82f6';
+                  } else if (s.status === 'Delivered') {
+                    statusBg = 'var(--success-glow)';
+                    statusColor = 'var(--success)';
+                  }
+
+                  return (
+                    <tr key={s.id} style={{ borderBottom: '1px solid var(--border-color)', verticalAlign: 'middle' }}>
+                      <td style={{ padding: '12px 10px' }}>
+                        <strong style={{ color: 'var(--text-primary)', display: 'block' }}>{s.customer_name}</strong>
+                        <span style={{ color: 'var(--text-muted)', fontSize: '11px', display: 'block' }}>{s.address}, {s.city} (CP {s.postal_code})</span>
+                        {s.notes && <span style={{ color: 'var(--text-muted)', fontSize: '10px', fontStyle: 'italic', display: 'block', marginTop: '2px' }}>Nota: {s.notes}</span>}
+                      </td>
+                      <td style={{ padding: '10px', fontWeight: 600 }}>{s.courier || 'Recoge'}</td>
+                      <td style={{ padding: '10px', fontFamily: 'monospace' }}>
+                        {s.tracking_number ? (
+                          <span style={{ color: 'var(--text-primary)', fontWeight: 500 }}>{s.tracking_number}</span>
+                        ) : (
+                          <span style={{ color: 'var(--text-muted)' }}>Por asignar</span>
+                        )}
+                      </td>
+                      <td style={{ padding: '10px', color: 'var(--accent)', fontWeight: 500 }}>${s.shipping_cost.toFixed(2)}</td>
+                      <td style={{ padding: '10px', textAlign: 'center' }}>
+                        <span style={{
+                          padding: '3px 8px',
+                          borderRadius: '4px',
+                          fontSize: '10px',
+                          fontWeight: 700,
+                          backgroundColor: statusBg,
+                          color: statusColor,
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.5px'
+                        }}>
+                          {s.status === 'Pending' ? 'Pendiente' : s.status === 'Shipped' ? 'En camino' : 'Entregado'}
+                        </span>
+                      </td>
+                      <td style={{ padding: '10px', textAlign: 'right' }}>
+                        <div style={{ display: 'flex', gap: '6px', justifyContent: 'flex-end' }}>
+                          <button onClick={() => handleEdit(s)} className="btn btn-secondary" style={{ padding: '5px 8px', fontSize: '11px' }}>
+                            <Edit size={12} />
+                          </button>
+                          <button onClick={() => handleDelete(s.id)} className="btn btn-danger" style={{ padding: '5px 8px', fontSize: '11px' }}>
+                            <Trash2 size={12} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

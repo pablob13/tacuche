@@ -98,3 +98,17 @@ export interface StoreSettings {
   category_faldas_url?: string;
   created_at?: string;
 }
+
+export interface Shipping {
+  id: string;
+  customer_name: string;
+  address: string;
+  city: string;
+  postal_code: string;
+  tracking_number?: string;
+  courier?: string; // DHL, FedEx, Estafeta, etc.
+  status: 'Pending' | 'Shipped' | 'Delivered';
+  shipping_cost: number;
+  notes?: string;
+  created_at?: string;
+}
