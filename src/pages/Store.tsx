@@ -125,14 +125,14 @@ export default function Store() {
     <div className="store-container fade-in" style={{ 
       backgroundColor: 'var(--bg-primary)', 
       color: 'var(--text-primary)', 
-      fontFamily: "'Outfit', sans-serif",
+      fontFamily: "'Special Elite', monospace",
       minHeight: '100vh',
       display: 'flex',
       flexDirection: 'column'
     }}>
       {/* Dynamic Fonts Import */}
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=Outfit:wght@300;400;500;600;700&family=Sedgwick+Ave+Display&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=Outfit:wght@300;400;500;600;700&family=Sedgwick+Ave+Display&family=Special+Elite&display=swap');
         
         .lookbook-link {
           font-size: 13px;
@@ -333,7 +333,7 @@ export default function Store() {
         }}>
           <div style={{ maxWidth: '700px' }}>
             <span style={{ 
-              fontFamily: "'Outfit', sans-serif", 
+              fontFamily: "'Special Elite', monospace", 
               textTransform: 'uppercase', 
               letterSpacing: '3px', 
               fontSize: '12px', 
@@ -361,7 +361,7 @@ export default function Store() {
               fontWeight: 300, 
               lineHeight: 1.6, 
               marginBottom: '28px',
-              fontFamily: "'Outfit', sans-serif"
+              fontFamily: "'Special Elite', monospace"
             }}>
               {settings?.store_subtitle || 'Prendas exclusivas confeccionadas a mano. Cada pieza es única y diseñada con pasión por nuestro estudio. Cotiza tu pedido y finaliza por WhatsApp.'}
             </p>
@@ -391,7 +391,7 @@ export default function Store() {
       <section id="popular-categories" style={{ padding: '64px 32px 32px 32px' }}>
         <h2 style={{
           textAlign: 'center',
-          fontFamily: "'Outfit', sans-serif",
+          fontFamily: "'Special Elite', monospace",
           fontSize: '18px',
           letterSpacing: '3px',
           fontWeight: 600,
