@@ -998,14 +998,28 @@ function CotizadorTab({ insumos, packagingCost, products, selectedProductId, set
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.8fr', gap: '16px' }}>
             <div className="form-group">
               <label className="form-label">Categoría de la Prenda</label>
-              <select className="form-select" value={category} onChange={e => setCategory(e.target.value)}>
-                <option value="Corsets">Corsets</option>
-                <option value="Suéteres">Suéteres</option>
-                <option value="Pantalones">Pantalones</option>
-                <option value="Faldas">Faldas / Faldones</option>
-                <option value="Vestidos">Vestidos</option>
-                <option value="Other">Otro / Colección</option>
-              </select>
+              <input 
+                type="text" 
+                className="form-input" 
+                list="category-suggestions" 
+                value={category} 
+                onChange={e => setCategory(e.target.value)} 
+                placeholder="Ej: Corsets, Bolsas, Accesorios..." 
+                required
+              />
+              <datalist id="category-suggestions">
+                <option value="Corsets" />
+                <option value="Suéteres" />
+                <option value="Pantalones" />
+                <option value="Faldas" />
+                <option value="Vestidos" />
+                <option value="Bolsas" />
+                <option value="Accesorios" />
+                <option value="Tops" />
+              </datalist>
+              <span style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '4px', display: 'block' }}>
+                Puedes seleccionar una sugerencia o escribir cualquier categoría nueva que quieras agregar.
+              </span>
             </div>
 
             <div className="form-group">

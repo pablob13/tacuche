@@ -14,6 +14,7 @@ export default function Store() {
   const [products, setProducts] = useState<Product[]>([]);
   const [settings, setSettings] = useState<StoreSettings | null>(null);
   const [selectedSizes, setSelectedSizes] = useState<Record<string, string>>({});
+  const [filterCategory, setFilterCategory] = useState<string>('all');
   const [loading, setLoading] = useState(true);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
@@ -116,10 +117,15 @@ export default function Store() {
     window.open(`https://wa.me/${phone}?text=${encoded}`, '_blank');
   };
 
-  // Filter products by designer
-  const filteredProducts = filterDesigner === 'all' 
-    ? products 
-    : products.filter(p => p.designer.toLowerCase() === filterDesigner.toLowerCase());
+  // Filter products by designer and category
+  const filteredProducts = products.filter(p => {
+    const matchesDesigner = filterDesigner === 'all' || p.designer.toLowerCase() === filterDesigner.toLowerCase();
+    const matchesCategory = filterCategory === 'all' || (p.category || 'Corsets').toLowerCase() === filterCategory.toLowerCase();
+    return matchesDesigner && matchesCategory;
+  });
+
+  // Extract unique categories currently present in active products list
+  const activeCategories = Array.from(new Set(products.map(p => p.category || 'Corsets'))).filter(Boolean);
 
   return (
     <>
@@ -445,47 +451,69 @@ export default function Store() {
       {/* Main Catalog Section */}
       <section id="product-catalog" style={{ padding: '48px 32px 64px 32px', flex: 1 }}>
         
-        {/* Designer filter & Header */}
+        {/* Catalog Filter Header Area */}
         <div style={{ 
-          display: 'flex', 
-          justifyContent: 'space-between', 
-          alignItems: 'center', 
           borderBottom: '1px solid var(--border-color)', 
-          paddingBottom: '16px',
+          paddingBottom: '20px',
           marginBottom: '32px'
         }}>
-          <h3 style={{ 
-            fontFamily: "'Sedgwick Ave Display', cursive", 
-            fontSize: '36px', 
-            fontWeight: 400,
-            letterSpacing: '1px'
-          }}>
-            Catálogo de Prendas
-          </h3>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px', marginBottom: '16px' }}>
+            <h3 style={{ 
+              fontFamily: "'Sedgwick Ave Display', cursive", 
+              fontSize: '36px', 
+              fontWeight: 400,
+              letterSpacing: '1px',
+              margin: 0
+            }}>
+              Catálogo de Prendas
+            </h3>
 
-          {/* Filters buttons */}
-          <div style={{ display: 'flex', gap: '12px' }}>
+            {/* Designer Filters */}
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <button 
+                onClick={() => setFilterDesigner('all')} 
+                className={`btn ${filterDesigner === 'all' ? 'btn-primary' : 'btn-secondary'}`}
+                style={{ padding: '6px 12px', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '1px', borderRadius: '0' }}
+              >
+                Todos los Diseñadores
+              </button>
+              <button 
+                onClick={() => setFilterDesigner('Tani')} 
+                className={`btn ${filterDesigner === 'Tani' ? 'btn-primary' : 'btn-secondary'}`}
+                style={{ padding: '6px 12px', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '1px', borderRadius: '0' }}
+              >
+                Atelier Tani
+              </button>
+              <button 
+                onClick={() => setFilterDesigner('Maripy')} 
+                className={`btn ${filterDesigner === 'Maripy' ? 'btn-primary' : 'btn-secondary'}`}
+                style={{ padding: '6px 12px', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '1px', borderRadius: '0' }}
+              >
+                Atelier Maripy
+              </button>
+            </div>
+          </div>
+
+          {/* Dynamic Category Filters Row */}
+          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
+            <span style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-secondary)', marginRight: '8px' }}>Categoría:</span>
             <button 
-              onClick={() => setFilterDesigner('all')} 
-              className={`btn ${filterDesigner === 'all' ? 'btn-primary' : 'btn-secondary'}`}
-              style={{ padding: '6px 14px', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '1px', borderRadius: '0' }}
+              onClick={() => setFilterCategory('all')} 
+              className={`btn ${filterCategory === 'all' ? 'btn-primary' : 'btn-secondary'}`}
+              style={{ padding: '4px 10px', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.5px', borderRadius: '0' }}
             >
-              Todos
+              Todas
             </button>
-            <button 
-              onClick={() => setFilterDesigner('Tani')} 
-              className={`btn ${filterDesigner === 'Tani' ? 'btn-primary' : 'btn-secondary'}`}
-              style={{ padding: '6px 14px', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '1px', borderRadius: '0' }}
-            >
-              Diseños Tani
-            </button>
-            <button 
-              onClick={() => setFilterDesigner('Maripy')} 
-              className={`btn ${filterDesigner === 'Maripy' ? 'btn-primary' : 'btn-secondary'}`}
-              style={{ padding: '6px 14px', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '1px', borderRadius: '0' }}
-            >
-              Diseños Maripy
-            </button>
+            {activeCategories.map(cat => (
+              <button 
+                key={cat}
+                onClick={() => setFilterCategory(cat)} 
+                className={`btn ${filterCategory === cat ? 'btn-primary' : 'btn-secondary'}`}
+                style={{ padding: '4px 10px', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.5px', borderRadius: '0' }}
+              >
+                {cat}
+              </button>
+            ))}
           </div>
         </div>
 
